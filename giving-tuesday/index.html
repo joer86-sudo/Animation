@@ -1,209 +1,264 @@
 <title>Project Shelter on GivingTuesday</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Public+Sans:wght@400;500;700&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&display=swap">
 <style>
-/* Layout: one narrow reading column under a night-sky hero with a lit window; a countdown is the single bold moment. */
+/* Project Shelter design system ("Facade"): Roofline, content on surface / surface-wall, one SignCard, BaseStrip. Mobile-first, square-edged, no shadows or gradients. */
 :root {
-  --bg: #eef1f5;
+  --shelter-blue: #0047ba;
+  --shelter-mint: #3bd4ae;
+  --night: #0b2559;
   --surface: #ffffff;
-  --ink: #15203a;
-  --muted: #4f5b73;
-  --line: #d3d9e3;
-  --lamp: #e9a23b;
-  --lamp-ink: #8a4f00;
-  --night: #15203a;
-  --night-ink: #f3f0e6;
-  --display: "Young Serif", Georgia, "Times New Roman", serif;
-  --body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --surface-wall: #f4f7f6;
+  --mint-wash: #e3f7f1;
+  --line: #d9e0e0;
+  --ink: #14212b;
+  --ink-muted: #56636b;
+  --blue-ink: #0047ba;
+  --mint-ink: #0a7c63;
+  --on-blue: #ffffff;
+  --on-mint: #0b2559;
+  --night-muted: #c9d6ee;
+  --base: #2d3238;
+  --on-base: #eef3f2;
+  --focus: #0047ba;
+  --din: "DIN Pro", "DIN", "D-DIN", Barlow, "Arial Narrow", Arial, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0e1524; --surface: #162036; --ink: #e8ecf3; --muted: #a6b0c4; --line: #2a3650;
-    --lamp: #f2b552; --lamp-ink: #f2b552; --night: #0a101c; --night-ink: #f3f0e6; color-scheme: dark;
+    --surface: #0e1620; --surface-wall: #16212c; --mint-wash: #10302a; --line: #2a3743;
+    --ink: #eef3f2; --ink-muted: #a7b4ba; --blue-ink: #8eb1f5; --mint-ink: #3bd4ae;
+    --base: #070c12; --focus: #3bd4ae; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0e1524; --surface: #162036; --ink: #e8ecf3; --muted: #a6b0c4; --line: #2a3650;
-  --lamp: #f2b552; --lamp-ink: #f2b552; --night: #0a101c; --night-ink: #f3f0e6; color-scheme: dark;
+  --surface: #0e1620; --surface-wall: #16212c; --mint-wash: #10302a; --line: #2a3743;
+  --ink: #eef3f2; --ink-muted: #a7b4ba; --blue-ink: #8eb1f5; --mint-ink: #3bd4ae;
+  --base: #070c12; --focus: #3bd4ae; color-scheme: dark;
 }
+
 * { box-sizing: border-box; }
-body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.6; }
-.wrap { max-width: 680px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-h1, h2 { font-family: var(--display); font-weight: 400; text-wrap: balance; line-height: 1.15; margin: 0; }
-h2 { font-size: 1.6rem; }
-p { margin: 0; }
-a { color: inherit; }
-a:focus-visible, button:focus-visible { outline: 3px solid var(--lamp); outline-offset: 3px; }
+body { background: var(--surface); color: var(--ink); font-family: var(--din); font-size: 17px; line-height: 27px; -webkit-font-smoothing: antialiased; }
+p, h1, h2, h3, figure, ol { margin: 0; }
+.wrap { max-width: 720px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
-/* Hero */
-.hero { background: var(--night); color: var(--night-ink); }
-.hero .wrap { padding-block: 56px 48px; display: grid; gap: 20px; }
-.eyebrow { font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--lamp); font-weight: 700; }
-.hero h1 { font-size: clamp(2.2rem, 7vw, 3.4rem); }
-.hero h1 em { font-style: normal; color: var(--lamp); }
-.hero p.lede { font-size: 1.15rem; color: #c9cfdb; max-width: 34em; }
-.window { width: 54px; height: 66px; border: 3px solid var(--lamp); border-radius: 4px; display: grid; grid-template-columns: 1fr 1fr; gap: 3px; padding: 3px; box-shadow: 0 0 40px 6px rgba(233,162,59,.35); }
-.window span { background: var(--lamp); opacity: .9; border-radius: 1px; }
-@media (prefers-reduced-motion: no-preference) {
-  .window { animation: glow 4s ease-in-out infinite alternate; }
-  @keyframes glow { from { box-shadow: 0 0 24px 2px rgba(233,162,59,.25); } to { box-shadow: 0 0 48px 10px rgba(233,162,59,.45); } }
-}
+/* Type styles from the brand tokens */
+.eyebrow { font-size: 13px; line-height: 16px; font-weight: 500; letter-spacing: 0.24em; text-transform: uppercase; color: var(--mint-ink); }
+.display { font-size: 40px; line-height: 44px; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
+.h1 { font-size: 30px; line-height: 36px; font-weight: 700; color: var(--blue-ink); text-wrap: balance; }
+.h2 { font-size: 22px; line-height: 28px; font-weight: 600; }
+.small { font-size: 15px; line-height: 22px; }
+.caption { font-size: 13px; line-height: 18px; color: var(--ink-muted); }
+.muted { color: var(--ink-muted); }
+.numeral { font-weight: 600; font-variant-numeric: tabular-nums; }
+@media (min-width: 768px) { .display { font-size: 56px; line-height: 60px; } }
 
-.count { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
-.count div { min-width: 76px; padding: 10px 12px; border: 1px solid rgba(243,240,230,.2); border-radius: 6px; text-align: center; }
-.count b { display: block; font-family: var(--display); font-weight: 400; font-size: 2rem; font-variant-numeric: tabular-nums; line-height: 1.1; }
-.count small { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: #aab3c5; }
-.count-note { font-size: 0.9rem; color: #aab3c5; }
+/* Buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 14px 20px; border-radius: 2px; font: 600 15px/20px var(--din); letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; cursor: pointer; border: 2px solid transparent; }
+.btn-mint { background: var(--shelter-mint); color: var(--on-mint); border-color: var(--shelter-mint); }
+.btn-mint:hover { background: #33c4a0; border-color: #33c4a0; }
+.btn-out-blue { background: transparent; color: var(--on-blue); border-color: var(--on-blue); }
+.btn-out { background: transparent; color: var(--blue-ink); border-color: var(--blue-ink); }
 
+/* Roofline */
+.roof { background: var(--shelter-blue); }
+.roof .wrap { padding-block: 16px; }
+.roof img { height: 36px; width: auto; display: block; }
+.roof-lip { height: 8px; background: var(--night); }
+
+/* Night hero panel */
+.hero { background: var(--night); color: var(--on-blue); }
+.hero .wrap { padding-block: 48px; display: grid; gap: 24px; }
+.hero .eyebrow { color: var(--shelter-mint); }
+.hero .display b { color: var(--shelter-mint); font-weight: 700; }
+.hero .lede { color: var(--night-muted); max-width: 60ch; }
+.count { display: flex; flex-wrap: wrap; gap: 8px; }
+.count div { min-width: 84px; padding: 12px 14px; background: var(--shelter-blue); }
+.count b { display: block; font-size: 36px; line-height: 40px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--on-blue); }
+.count small { font-size: 13px; line-height: 16px; font-weight: 500; letter-spacing: 0.24em; text-transform: uppercase; color: var(--shelter-mint); }
+.count-note { color: var(--night-muted); }
 .btns { display: flex; flex-wrap: wrap; gap: 12px; }
-.btn { display: inline-block; padding: 12px 18px; border-radius: 6px; font: 700 0.95rem var(--body); text-decoration: none; cursor: pointer; border: 2px solid var(--lamp); }
-.btn.primary { background: var(--lamp); color: #15203a; }
-.btn.ghost { background: transparent; color: inherit; }
 
-/* Body sections */
-main .wrap { padding-block: 48px 64px; display: grid; gap: 48px; }
-section { display: grid; gap: 14px; }
-.muted { color: var(--muted); }
+/* Sections */
+.band { padding-block: 48px; }
+.band.wall { background: var(--surface-wall); }
+.band .wrap { display: grid; gap: 24px; }
+.head { display: grid; gap: 12px; }
+@media (min-width: 768px) { .band { padding-block: 64px; } }
 
-.not-yet { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 22px; display: grid; gap: 10px; }
-.not-yet strong { color: var(--lamp-ink); }
+.pillar { border-left: 8px solid var(--shelter-mint); padding-left: 16px; display: grid; gap: 8px; }
 
-.match { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; gap: 10px; text-align: center; }
-.match .cell { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 8px; min-width: 0; }
-.match .cell b { display: block; font-family: var(--display); font-weight: 400; font-size: 1.5rem; font-variant-numeric: tabular-nums; }
-.match .cell small { color: var(--muted); font-size: 0.8rem; line-height: 1.3; display: block; }
-.match .op { font-family: var(--display); font-size: 1.4rem; color: var(--muted); }
-.match .cell.total { border-color: var(--lamp); }
-.match .cell.total b { color: var(--lamp-ink); }
-@media (max-width: 480px) {
-  .match { grid-template-columns: 1fr; }
-  .match .op { line-height: 1; }
+/* SignCard: the one key message */
+.sign { background: var(--surface); border: 4px solid var(--shelter-mint); padding: 32px 24px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; }
+.sign img { height: 44px; width: auto; }
+.sign .small { max-width: 34ch; color: var(--ink-muted); }
+@media (min-width: 768px) { .sign { border-width: 6px; } }
+
+/* Worked example */
+.example { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.example .cell { background: var(--surface); border: 1px solid var(--line); padding: 16px; display: grid; gap: 4px; min-width: 0; }
+.example .cell .numeral { font-size: 30px; line-height: 36px; color: var(--blue-ink); }
+.example .cell.total { background: var(--mint-wash); border-color: var(--mint-wash); }
+.example .cell.total .numeral { color: var(--mint-ink); }
+.example .op { font-size: 22px; font-weight: 600; color: var(--ink-muted); text-align: center; line-height: 1; }
+@media (min-width: 640px) {
+  .example { grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; }
 }
-.fine { font-size: 0.88rem; color: var(--muted); }
 
-ol.steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 16px; counter-reset: s; }
-ol.steps li { counter-increment: s; display: grid; grid-template-columns: 40px 1fr; gap: 14px; align-items: start; }
-ol.steps li::before { content: counter(s); font-family: var(--display); font-size: 1.3rem; width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--lamp); display: grid; place-items: center; color: var(--lamp-ink); }
+/* Steps */
+ol.steps { list-style: none; padding: 0; display: grid; gap: 16px; counter-reset: s; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 48px 1fr; gap: 16px; align-items: start; }
+ol.steps li::before { content: counter(s, decimal-leading-zero); height: 48px; display: grid; place-items: center; background: var(--mint-wash); color: var(--mint-ink); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
 ol.steps li div { min-width: 0; display: grid; gap: 4px; }
 
-.share { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: grid; gap: 12px; }
-.share p { font-size: 0.95rem; }
-.share .btn { justify-self: start; color: var(--ink); }
-.copied { font-size: 0.85rem; color: var(--lamp-ink); }
+.share { background: var(--surface); border: 1px solid var(--line); padding: 16px; display: grid; gap: 12px; }
+.share .btn { justify-self: start; }
+.copied { color: var(--mint-ink); font-weight: 500; }
 
-details { border-top: 1px solid var(--line); padding-block: 14px; }
+details { border-top: 1px solid var(--line); padding-block: 16px; }
 details:last-child { border-bottom: 1px solid var(--line); }
-summary { cursor: pointer; font-weight: 700; }
-details p { margin-top: 8px; color: var(--muted); }
+summary { cursor: pointer; font-size: 17px; font-weight: 600; }
+details p { margin-top: 8px; color: var(--ink-muted); }
 
-footer { border-top: 1px solid var(--line); }
-footer .wrap { padding-block: 24px 40px; font-size: 0.85rem; color: var(--muted); }
+/* BaseStrip */
+.basestrip { background: var(--base); color: var(--on-base); }
+.basestrip .wrap { padding-block: 32px 24px; display: grid; gap: 16px; }
+.basestrip img { height: 30px; width: auto; }
+.basestrip .eyebrow { color: var(--shelter-mint); font-size: 14px; }
+.basestrip .q { opacity: 0.72; font-size: 15px; line-height: 22px; }
 </style>
 
-<header class="hero">
+<header class="roof">
+  <div class="wrap"><img src="assets/logo-horizontal-reverse.svg" alt="Project Shelter"></div>
+</header>
+<div class="roof-lip" aria-hidden="true"></div>
+
+<section class="hero">
   <div class="wrap">
-    <div class="window" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-    <p class="eyebrow">GivingTuesday · Tuesday, December 1, 2026</p>
-    <h1><span data-name>Project Shelter</span> needs you on one day. <em>December 1.</em></h1>
-    <p class="lede">We're not asking for money today. We're asking you to remember a date. Gifts made through GlobalGiving on GivingTuesday get a share of a $500,000 matching fund, so the same donation does more for the people we shelter.</p>
-    <div class="count" id="count" aria-live="off">
-      <div><b id="d">--</b><small>days</small></div>
-      <div><b id="h">--</b><small>hours</small></div>
-      <div><b id="m">--</b><small>minutes</small></div>
+    <p class="eyebrow">GivingTuesday · Tuesday 1 December 2026</p>
+    <h1 class="display">Give on one day, and your gift <b>builds more.</b></h1>
+    <p class="lede">We're not asking for money today. We're asking you to remember a date. On GivingTuesday, every gift to Project Shelter through GlobalGiving earns a share of a $500,000 matching fund.</p>
+    <div class="count" id="count">
+      <div><b id="d">--</b><small>Days</small></div>
+      <div><b id="h">--</b><small>Hours</small></div>
+      <div><b id="m">--</b><small>Mins</small></div>
     </div>
-    <p class="count-note" id="countNote">Until GivingTuesday begins, midnight Eastern Time.</p>
+    <p class="count-note small" id="countNote">Until GivingTuesday begins, midnight US Eastern Time.</p>
     <div class="btns">
-      <a class="btn primary" id="calBtn" target="_blank" rel="noopener" href="#">Add December 1 to my calendar</a>
-      <a class="btn ghost" id="ggBtn" target="_blank" rel="noopener" href="#">See our GlobalGiving page</a>
+      <a class="btn btn-mint" id="calBtn" target="_blank" rel="noopener" href="#">Add 1 December to my calendar</a>
+      <a class="btn btn-out-blue" id="ggBtn" target="_blank" rel="noopener" href="#">See our GlobalGiving page</a>
     </div>
   </div>
-</header>
+</section>
 
 <main>
-  <div class="wrap">
-
-    <section>
-      <h2>Why you're seeing our ads now</h2>
-      <div class="not-yet">
-        <p><strong>Please don't donate yet.</strong> Gifts made before December 1 don't count toward the GivingTuesday match.</p>
-        <p class="muted">For the next few weeks we're simply spreading the word, so that when the day arrives you're ready and your gift is worth more.</p>
+  <section class="band">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Why you're seeing this now</p>
+        <h2 class="h1">Please wait until 1 December to give.</h2>
       </div>
-    </section>
+      <div class="pillar">
+        <p>Gifts made before GivingTuesday don't earn a share of the matching fund. For the next few weeks we're simply spreading the word, so that when the day comes, you're ready and your gift goes further.</p>
+      </div>
+      <p class="muted">Project Shelter builds safe, two-bedroom concrete homes together with families who could never build one alone: widows, people with disabilities, people who are bedridden and families who lost their home to disaster. Every home is built by many people giving a little.</p>
+    </div>
+  </section>
 
-    <section>
-      <h2>What happens on December 1</h2>
-      <p>GlobalGiving, the nonprofit crowdfunding platform that hosts our fundraiser, sets aside a <strong>$500,000 Incentive Fund</strong> for GivingTuesday. Every eligible donation made that day to a participating project, including ours, earns a share of it.</p>
-      <p>The match is proportional, not dollar for dollar. When the day ends, GlobalGiving divides the fund across all eligible gifts. Here's an example:</p>
-      <div class="match" aria-label="Example: a $100 gift plus a $20 bonus share makes $120 for the shelter">
-        <div class="cell"><b>$100</b><small>your gift on Dec 1</small></div>
+  <section class="band wall">
+    <div class="wrap">
+      <div class="sign">
+        <img src="assets/mark.svg" alt="">
+        <p class="eyebrow">On GivingTuesday only</p>
+        <p class="h1">Every gift earns a share of a $500,000 fund.</p>
+        <p class="small">GlobalGiving adds it on top of what you give, and it all goes to the homes.</p>
+      </div>
+      <div class="head">
+        <p class="eyebrow">How the match works</p>
+        <h2 class="h2">GlobalGiving shares the fund across every eligible gift made that day.</h2>
+      </div>
+      <p>It isn't dollar for dollar. When the day ends, GlobalGiving divides the $500,000 among all eligible GivingTuesday gifts on its platform, so every gift gets the same percentage on top.</p>
+      <div class="example" aria-label="Example: a 100 dollar gift plus a 20 dollar share of the fund means 120 dollars for the homes">
+        <div class="cell"><span class="numeral">$100</span><span class="caption">You give on 1 December</span></div>
         <div class="op" aria-hidden="true">+</div>
-        <div class="cell"><b>$20</b><small>example share of the fund</small></div>
+        <div class="cell"><span class="numeral">$20</span><span class="caption">Example share of the fund</span></div>
         <div class="op" aria-hidden="true">=</div>
-        <div class="cell total"><b>$120</b><small>reaches the shelter</small></div>
+        <div class="cell total"><span class="numeral">$120</span><span class="caption">Goes to the homes</span></div>
       </div>
-      <p class="fine">Example only. If donors give $2.5 million in total that day, the $500,000 fund adds 20¢ to every eligible dollar. The real rate depends on how much everyone gives. GlobalGiving sets the rules and decides final eligibility.</p>
-    </section>
+      <p class="caption">Example only. If donors give $2.5 million in total that day, the fund adds 20 cents to every eligible dollar. The real rate depends on how much everyone gives. GlobalGiving sets the rules and decides which gifts are eligible.</p>
+    </div>
+  </section>
 
-    <section>
-      <h2>What to do now</h2>
+  <section class="band">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">What to do now</p>
+        <h2 class="h1">Four small steps, together.</h2>
+      </div>
       <ol class="steps">
-        <li><div><strong>Save the date.</strong><span class="muted">Add December 1 to your calendar with the button above. It includes the link you'll need.</span></div></li>
-        <li><div><strong>Decide what you'll give.</strong><span class="muted">Any amount helps, and every eligible gift earns a share of the fund.</span></div></li>
-        <li><div><strong>Give on GlobalGiving on December 1.</strong><span class="muted">Use our GlobalGiving page so your gift counts toward the match.</span></div></li>
-        <li><div><strong>Tell one friend.</strong><span class="muted">More gifts to us on the day means a bigger share of the fund for the shelter.</span></div></li>
+        <li><div><p class="h2">Save the date</p><p class="muted">Add 1 December to your calendar with the button above. The reminder includes our GlobalGiving link.</p></div></li>
+        <li><div><p class="h2">Decide what you'll give</p><p class="muted">Any amount helps. Every eligible gift earns the same share of the fund.</p></div></li>
+        <li><div><p class="h2">Give on our GlobalGiving page on 1 December</p><p class="muted">Give through GlobalGiving so your gift counts towards the match.</p></div></li>
+        <li><div><p class="h2">Tell one friend</p><p class="muted">The more of us who give on the day, the larger the share that reaches the homes.</p></div></li>
       </ol>
       <div class="share">
-        <p id="shareText">On December 1 (GivingTuesday), gifts to Project Shelter on GlobalGiving get a share of a $500,000 matching fund. Don't give yet. Save the date and give on the day.</p>
-        <button class="btn ghost" id="copyBtn" type="button">Copy message to share</button>
-        <span class="copied" id="copied" hidden>Copied. Paste it anywhere.</span>
+        <p class="small" id="shareText">On 1 December (GivingTuesday), gifts to Project Shelter on GlobalGiving earn a share of a $500,000 matching fund. Don't give yet. Save the date and give on the day.</p>
+        <button class="btn btn-out" id="copyBtn" type="button">Copy message to share</button>
+        <p class="copied small" id="copied" hidden>Copied. Paste it anywhere.</p>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section>
-      <h2>Questions</h2>
+  <section class="band wall">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Questions</p>
+        <h2 class="h1">Before you give</h2>
+      </div>
       <div>
-        <details><summary>Why not just donate today?</summary><p>You can, and we're grateful for any gift. But only donations made on GivingTuesday earn a share of GlobalGiving's matching fund, so waiting until December 1 makes your gift go further.</p></details>
-        <details><summary>Is it a 1:1 match?</summary><p>No. The $500,000 is shared across all eligible GivingTuesday donations on GlobalGiving in proportion to their size. Every eligible gift gets the same percentage bonus.</p></details>
-        <details><summary>Is my donation tax-deductible?</summary><p>GlobalGiving is a US 501(c)(3) nonprofit and sends you a receipt for your donation. Check with your tax adviser about your own situation.</p></details>
-        <details><summary>Do monthly donations count?</summary><p>GlobalGiving publishes the full eligibility rules for GivingTuesday, including limits per donor and which donation types count. We'll share the details here before December 1.</p></details>
+        <details><summary>Why not give today?</summary><p>You can, and we're grateful for every gift. But only gifts made on GivingTuesday earn a share of GlobalGiving's matching fund, so waiting until 1 December makes your gift go further.</p></details>
+        <details><summary>Is it a one-to-one match?</summary><p>No. The $500,000 is shared across all eligible GivingTuesday gifts on GlobalGiving in proportion to their size. Every eligible gift gets the same percentage on top.</p></details>
+        <details><summary>Is my gift tax-deductible?</summary><p>GlobalGiving is a US 501(c)(3) charity and sends a receipt for every gift, which is tax-deductible for US donors. Rules in other countries differ, so check what applies to you.</p></details>
+        <details><summary>Is there a limit per donor, and do monthly gifts count?</summary><p>GlobalGiving publishes the full eligibility rules for GivingTuesday, including any limit per donor and which kinds of gift count. We'll share the details here before 1 December.</p></details>
       </div>
-    </section>
-
-  </div>
+    </div>
+  </section>
 </main>
 
-<footer>
-  <div class="wrap">Matching funds are provided and administered by GlobalGiving. Terms are set by GlobalGiving and may change.</div>
+<footer class="basestrip">
+  <div class="wrap">
+    <img src="assets/logo-horizontal-reverse.svg" alt="Project Shelter">
+    <p class="eyebrow">Let no one be homeless</p>
+    <p class="q">Matching funds are provided and administered by GlobalGiving. GlobalGiving sets the terms.</p>
+  </div>
 </footer>
 
 <script>
-// Edit these two values.
-const CONFIG = {
-  name: "Project Shelter",
-  globalGivingUrl: "https://www.globalgiving.org/"   // replace with your project page link
-};
+// Edit this value: your GlobalGiving project page.
+const GLOBALGIVING_URL = "https://www.globalgiving.org/";
 
-document.querySelectorAll("[data-name]").forEach(el => el.textContent = CONFIG.name);
+document.getElementById("ggBtn").href = GLOBALGIVING_URL;
 document.getElementById("shareText").textContent =
-  `On December 1 (GivingTuesday), gifts to ${CONFIG.name} on GlobalGiving get a share of a $500,000 matching fund. Don't give yet. Save the date and give on the day: ${CONFIG.globalGivingUrl}`;
-document.getElementById("ggBtn").href = CONFIG.globalGivingUrl;
+  `On 1 December (GivingTuesday), gifts to Project Shelter on GlobalGiving earn a share of a $500,000 matching fund. Don't give yet. Save the date and give on the day: ${GLOBALGIVING_URL}`;
 
 const cal = new URL("https://calendar.google.com/calendar/render");
 cal.searchParams.set("action", "TEMPLATE");
-cal.searchParams.set("text", `Give to ${CONFIG.name} on GlobalGiving (GivingTuesday match)`);
+cal.searchParams.set("text", "Give to Project Shelter on GlobalGiving (GivingTuesday)");
 cal.searchParams.set("dates", "20261201/20261202");
-cal.searchParams.set("details", `Today's gifts get a share of GlobalGiving's $500,000 GivingTuesday fund. Give here: ${CONFIG.globalGivingUrl}`);
+cal.searchParams.set("details", `Gifts today earn a share of GlobalGiving's $500,000 GivingTuesday fund. Give here: ${GLOBALGIVING_URL}`);
 document.getElementById("calBtn").href = cal.toString();
 
-// Midnight Eastern (EST, UTC-5) on Dec 1, 2026
+// Midnight US Eastern (EST, UTC-5) on 1 December 2026
 const start = Date.UTC(2026, 11, 1, 5, 0, 0);
 const end = Date.UTC(2026, 11, 2, 5, 0, 0);
 function tick() {
   const now = Date.now();
   const note = document.getElementById("countNote");
-  if (now >= end) { document.getElementById("count").hidden = true; note.textContent = "GivingTuesday has ended. Thank you to everyone who gave."; return; }
-  if (now >= start) { document.getElementById("count").hidden = true; note.textContent = "It's GivingTuesday. Today's gifts count toward the match."; document.getElementById("ggBtn").textContent = "Donate on GlobalGiving now"; return; }
+  const count = document.getElementById("count");
+  if (now >= end) { count.hidden = true; note.textContent = "GivingTuesday has ended. Thank you to everyone who gave."; return; }
+  if (now >= start) { count.hidden = true; note.textContent = "It's GivingTuesday. Gifts made today earn a share of the fund."; document.getElementById("ggBtn").textContent = "Give on GlobalGiving now"; return; }
   const s = Math.floor((start - now) / 1000);
   document.getElementById("d").textContent = Math.floor(s / 86400);
   document.getElementById("h").textContent = String(Math.floor(s % 86400 / 3600)).padStart(2, "0");
@@ -212,14 +267,9 @@ function tick() {
 tick(); setInterval(tick, 30000);
 
 document.getElementById("copyBtn").addEventListener("click", () => {
-  const text = document.getElementById("shareText").textContent;
+  const el = document.getElementById("shareText");
   const done = () => { document.getElementById("copied").hidden = false; };
-  try {
-    navigator.clipboard.writeText(text).then(done, () => selectText());
-  } catch (e) { selectText(); }
-  function selectText() {
-    const r = document.createRange(); r.selectNodeContents(document.getElementById("shareText"));
-    const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
-  }
+  const selectText = () => { const r = document.createRange(); r.selectNodeContents(el); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); };
+  try { navigator.clipboard.writeText(el.textContent).then(done, selectText); } catch (e) { selectText(); }
 });
 </script>
