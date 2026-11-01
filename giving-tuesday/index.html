@@ -71,6 +71,19 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px soli
 /* Night hero panel */
 .hero { background: var(--night); color: var(--on-blue); }
 .hero .wrap { padding-block: 48px; display: grid; gap: 24px; }
+.hero-grid { display: grid; gap: 24px; align-items: center; }
+.hero-copy { display: grid; gap: 24px; min-width: 0; }
+.gather { width: 112px; height: 112px; cursor: pointer; }
+.gather svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.gather path { fill: var(--shelter-mint); }
+@media (prefers-reduced-motion: no-preference) {
+  .gather.play path { animation: gather 1.4s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i) * 70ms); }
+  @keyframes gather { from { transform: translate(var(--x), var(--y)); opacity: .2; } to { transform: none; opacity: 1; } }
+}
+@media (min-width: 768px) {
+  .hero-grid { grid-template-columns: 1fr 220px; gap: 48px; }
+  .gather { width: 220px; height: 220px; order: 2; }
+}
 .hero .eyebrow { color: var(--shelter-mint); }
 .hero .display b { color: var(--shelter-mint); font-weight: 700; }
 .hero .lede { color: var(--night-muted); max-width: 60ch; }
@@ -89,6 +102,33 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px soli
 @media (min-width: 768px) { .band { padding-block: 64px; } }
 
 .pillar { border-left: 8px solid var(--shelter-mint); padding-left: 16px; display: grid; gap: 8px; }
+
+/* PillarFrame: two mint pillars around a photograph */
+.pf { display: grid; gap: 8px; min-width: 0; }
+.pf .frame { display: grid; grid-template-columns: 8px 1fr 8px; gap: 8px; }
+.pf .frame::before, .pf .frame::after { content: ""; background: var(--shelter-mint); }
+.pf img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: var(--surface-wall); }
+.intro { display: grid; gap: 24px; }
+@media (min-width: 768px) { .intro { grid-template-columns: 1fr 1fr; align-items: start; } }
+
+/* 50 homes wall */
+.homes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+@media (min-width: 560px) { .homes { grid-template-columns: repeat(10, 1fr); } }
+.home { position: relative; padding: 0; border: 0; background: var(--surface-wall); cursor: pointer; aspect-ratio: 1; overflow: hidden; }
+.home img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s ease; }
+.home:hover img { transform: scale(1.06); }
+.home .n { position: absolute; left: 0; bottom: 0; padding: 1px 5px; background: var(--night); color: var(--shelter-mint); font-size: 11px; line-height: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.home.named::after { content: ""; position: absolute; top: 0; right: 0; width: 10px; height: 10px; background: var(--shelter-mint); }
+.home[aria-pressed="true"] { outline: 4px solid var(--shelter-mint); outline-offset: -4px; }
+.home[aria-pressed="true"] .n { background: var(--shelter-mint); color: var(--on-mint); }
+.home-detail { display: grid; gap: 16px; }
+@media (min-width: 768px) { .home-detail { grid-template-columns: 1fr 1fr; align-items: center; gap: 32px; } }
+.home-detail .txt { display: grid; gap: 8px; min-width: 0; }
+.housetag { justify-self: start; background: var(--mint-wash); padding: 4px 10px; display: flex; gap: 6px; align-items: baseline; }
+.housetag b { color: var(--mint-ink); font-size: 20px; line-height: 24px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.housetag span { color: var(--ink-muted); font-size: 15px; font-variant-numeric: tabular-nums; }
+.legend { display: flex; align-items: center; gap: 8px; }
+.legend i { width: 10px; height: 10px; background: var(--shelter-mint); display: inline-block; }
 
 /* SignCard: the one key message */
 .sign { background: var(--surface); border: 4px solid var(--shelter-mint); padding: 32px 24px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; }
@@ -137,6 +177,20 @@ details p { margin-top: 8px; color: var(--ink-muted); }
 
 <section class="hero">
   <div class="wrap">
+   <div class="hero-grid">
+    <div class="gather" id="gather" role="img" aria-label="The Project Shelter mark: many hands meeting under one roof" title="Replay">
+      <svg viewBox="128 365 112 111" aria-hidden="true">
+        <path d="M 200.941406 427.175781 L 239.242188 427.175781 L 239.242188 414.601562 L 200.941406 414.601562 Z"/>
+        <path d="M 166.023438 429.921875 L 140.40625 455.542969 L 149.300781 464.433594 L 175.929688 437.800781 L 166.023438 437.800781 Z"/>
+        <path d="M 227.496094 386.238281 L 218.601562 377.347656 L 194.851562 401.09375 L 203.746094 409.988281 Z"/>
+        <path d="M 177.664062 395.546875 L 183.484375 389.726562 L 190.238281 396.480469 L 190.238281 365.597656 L 177.664062 365.597656 Z"/>
+        <path d="M 200.941406 437.800781 L 191.96875 437.800781 L 218.601562 464.433594 L 227.496094 455.542969 L 200.941406 428.988281 Z"/>
+        <path d="M 172.582031 400.628906 L 149.300781 377.347656 L 140.40625 386.238281 L 163.6875 409.519531 Z"/>
+        <path d="M 166.023438 414.601562 L 128.65625 414.601562 L 128.65625 427.179688 L 166.023438 427.179688 Z"/>
+        <path d="M 177.664062 476.183594 L 190.238281 476.183594 L 190.238281 414.757812 L 177.664062 414.757812 Z"/>
+      </svg>
+    </div>
+    <div class="hero-copy">
     <p class="eyebrow">GivingTuesday · Tuesday 1 December 2026</p>
     <h1 class="display">Give on one day, and your gift <b>builds more.</b></h1>
     <p class="lede">We're not asking for money today. We're asking you to remember a date. On GivingTuesday, every gift to Project Shelter through GlobalGiving earns a share of a $500,000 matching fund.</p>
@@ -150,6 +204,8 @@ details p { margin-top: 8px; color: var(--ink-muted); }
       <a class="btn btn-mint" id="calBtn" target="_blank" rel="noopener" href="#">Add 1 December to my calendar</a>
       <a class="btn btn-out-blue" id="ggBtn" target="_blank" rel="noopener" href="#">See our GlobalGiving page</a>
     </div>
+    </div>
+   </div>
   </div>
 </section>
 
