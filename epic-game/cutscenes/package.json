@@ -1,0 +1,23 @@
+{
+  "name": "epic-game-cutscenes",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "render:prologue": "remotion render src/index.ts Prologue ../game/public/cutscenes/prologue.mp4"
+  },
+  "dependencies": {
+    "@react-three/fiber": "^9.8.2",
+    "@remotion/cli": "4.0.540",
+    "@remotion/three": "4.0.540",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "remotion": "4.0.540",
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/three": "^0.187.0",
+    "typescript": "~5.9.0"
+  }
+}
