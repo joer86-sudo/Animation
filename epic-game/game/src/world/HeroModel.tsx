@@ -3,7 +3,7 @@ import { useAnimations, useGLTF } from '@react-three/drei'
 import { Box3, Group, LoopOnce, Vector3 } from 'three'
 import { useGame } from '../store'
 
-export const HERO_URL = '/models/hero.glb'
+export const HERO_URL = 'models/hero.glb'
 const HERO_HEIGHT = 1.7 // world units; the model is auto-scaled to this
 
 // Returns true once we've confirmed public/models/hero.glb exists.

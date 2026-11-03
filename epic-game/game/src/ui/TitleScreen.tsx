@@ -15,7 +15,7 @@ export function TitleScreen() {
     <div className="title-screen">
       {showVideo && (
         <video
-          src="/cutscenes/prologue.mp4"
+          src="cutscenes/prologue.mp4"
           autoPlay
           muted
           playsInline

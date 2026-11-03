@@ -10,6 +10,11 @@ epic-game/
 └── cutscenes/   Remotion project; renders MP4s into game/public/cutscenes/
 ```
 
+## Play it
+
+Online: https://claude.ai/artifact/2HRzucp8zqq9U4NjqMJdjv (private to the owner until shared from its Share menu).
+Works on desktop (keyboard) and phones (on-screen stick and buttons).
+
 ## Run it
 
 ```bash
@@ -43,6 +48,13 @@ His kit (tuning constants at the top of `store.ts`):
   track of him), or **drinks** a bottle (fastest, but he's rooted and takes double damage)
 - **Frenzy** (8 s): faster movement, double damage, faster punches, unlimited bottles, heals 1 heart,
   and he glows
+
+## Gimlet handover kit
+
+`gimlet-handover/` holds everything needed to take Gimlet to another project or another Claude:
+`GIMLET_HANDOVER.md` (character bible, kit, rig notes, full source), `gimlet.glb` (the model with named
+joints) and `gimlet-concept.png` (the concept art). Re-export the model any time from the
+**Export .glb** button in the `?view=gimlet` viewer.
 
 ## Writing story
 

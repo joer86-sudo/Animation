@@ -7,3 +7,6 @@ export const keyMap: { name: Controls; keys: string[] }[] = [
   { name: 'right', keys: ['KeyD', 'ArrowRight'] },
   { name: 'jump', keys: ['Space'] },
 ]
+
+// Written by the on-screen touch controls, read by the Player each frame.
+export const touchInput = { x: 0, z: 0, jump: false }

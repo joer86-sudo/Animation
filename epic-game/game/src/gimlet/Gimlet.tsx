@@ -240,12 +240,12 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
   }
 
   const Leg = ({ side, thigh, knee }: { side: 1 | -1; thigh: React.RefObject<Group | null>; knee: React.RefObject<Group | null> }) => (
-    <group ref={thigh} position={[side * 0.12, -0.04, 0]}>
+    <group ref={thigh} name={side === 1 ? 'thigh_L' : 'thigh_R'} position={[side * 0.12, -0.04, 0]}>
       <mesh material={mats.pants} position-y={-0.24}>
         <cylinderGeometry args={[0.135, 0.15, 0.5, 14]} />
       </mesh>
       <Stripes side={side} y={-0.24} len={0.48} r0={0.137} r1={0.15} />
-      <group ref={knee} position-y={-0.47}>
+      <group ref={knee} name={side === 1 ? 'knee_L' : 'knee_R'} position-y={-0.47}>
         <mesh material={mats.pants} position-y={-0.19}>
           <cylinderGeometry args={[0.15, 0.2, 0.38, 14]} />
         </mesh>
@@ -289,14 +289,14 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
     handBottle: React.RefObject<Group | null>
     skin: MeshStandardMaterial
   }) => (
-    <group ref={shoulder} position={[side * 0.25, 0.44, 0]}>
+    <group ref={shoulder} name={side === 1 ? 'shoulder_L' : 'shoulder_R'} position={[side * 0.25, 0.44, 0]}>
       <mesh material={mats.skin}>
         <sphereGeometry args={[0.072, 14, 12]} />
       </mesh>
       <mesh material={skin} position-y={-0.15}>
         <capsuleGeometry args={[0.058, 0.2, 6, 12]} />
       </mesh>
-      <group ref={elbow} position-y={-0.3}>
+      <group ref={elbow} name={side === 1 ? 'elbow_L' : 'elbow_R'} position-y={-0.3}>
         <mesh material={skin} position-y={-0.13}>
           <capsuleGeometry args={[0.05, 0.2, 6, 12]} />
         </mesh>
@@ -325,8 +325,8 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
   )
 
   return (
-    <group ref={root}>
-      <group ref={hips} position-y={1.0}>
+    <group ref={root} name="Gimlet">
+      <group ref={hips} name="hips" position-y={1.0}>
         {/* waist: baggy pants top, boxers band, belt, holsters */}
         <mesh material={mats.pants} position-y={-0.03}>
           <cylinderGeometry args={[0.2, 0.23, 0.16, 16]} />
@@ -357,7 +357,7 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
         <Leg side={1} thigh={thighL} knee={kneeL} />
         <Leg side={-1} thigh={thighR} knee={kneeR} />
 
-        <group ref={spine} position-y={0.1}>
+        <group ref={spine} name="spine" position-y={0.1}>
           {/* tank top torso (rotated so the spiral faces forward) */}
           <mesh material={mats.top} position-y={0.22} rotation-y={Math.PI} scale={[1, 1, 0.72]}>
             <cylinderGeometry args={[0.235, 0.19, 0.48, 20, 1]} />
@@ -388,14 +388,14 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
           <mesh material={mats.skin} position-y={0.52}>
             <cylinderGeometry args={[0.055, 0.065, 0.12, 12]} />
           </mesh>
-          <group ref={head} position-y={0.58}>
+          <group ref={head} name="head" position-y={0.58}>
             <Head mats={mats} />
           </group>
         </group>
       </group>
 
       {/* frenzy aura */}
-      <mesh ref={aura} position-y={1.0} visible={false}>
+      <mesh ref={aura} name="frenzy_aura" position-y={1.0} visible={false}>
         <sphereGeometry args={[0.75, 24, 16]} />
         <meshBasicMaterial color="#5dff3a" transparent opacity={0} depthWrite={false} side={BackSide} blending={AdditiveBlending} />
       </mesh>

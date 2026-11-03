@@ -4,7 +4,7 @@ import { useKeyboardControls } from '@react-three/drei'
 import { CapsuleCollider, RigidBody, useRapier, type RapierRigidBody } from '@react-three/rapier'
 import { Group, Vector3 } from 'three'
 import { isDrinking, isFrenzy, playerState, useGame } from '../store'
-import type { Controls } from '../controls'
+import { touchInput, type Controls } from '../controls'
 import { HeroModel, useHeroAvailable } from './HeroModel'
 import { HIDE_SPOTS } from './Level'
 import { Gimlet, type GimletPose } from '../gimlet/Gimlet'
@@ -52,7 +52,7 @@ export function Player() {
       g.hurt()
     }
 
-    move.set(Number(keys.right) - Number(keys.left), 0, Number(keys.back) - Number(keys.forward))
+    move.set(Number(keys.right) - Number(keys.left) + touchInput.x, 0, Number(keys.back) - Number(keys.forward) + touchInput.z)
     if (rooted) move.set(0, 0, 0)
     moving.current = move.lengthSq() > 0
     if (moving.current) move.normalize().multiplyScalar(SPEED * (frenzy ? FRENZY_SPEED_MUL : 1))
@@ -61,8 +61,9 @@ export function Player() {
     const grounded = world.castRay(ray, 1.0, true, undefined, undefined, undefined, b) !== null
 
     let vy = vel.y
-    if (keys.jump && !jumpHeld.current && grounded && !rooted) vy = JUMP_VELOCITY
-    jumpHeld.current = keys.jump
+    const jump = keys.jump || touchInput.jump
+    if (jump && !jumpHeld.current && grounded && !rooted) vy = JUMP_VELOCITY
+    jumpHeld.current = jump
 
     b.setLinvel({ x: move.x, y: vy, z: move.z }, true)
     playerState.position.set(t.x, t.y, t.z)

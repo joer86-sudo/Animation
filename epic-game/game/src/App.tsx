@@ -12,6 +12,7 @@ import { Projectiles } from './world/Projectiles'
 import { HUD } from './ui/HUD'
 import { DialogueBox } from './ui/DialogueBox'
 import { TitleScreen } from './ui/TitleScreen'
+import { TouchControls } from './ui/TouchControls'
 
 export default function App() {
   const runId = useGame((s) => s.runId)
@@ -58,6 +59,7 @@ export default function App() {
       </Canvas>
       <HUD />
       <DialogueBox />
+      <TouchControls />
       <TitleScreen />
     </KeyboardControls>
   )
