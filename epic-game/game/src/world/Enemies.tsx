@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { BallCollider, RigidBody, type RapierRigidBody } from '@react-three/rapier'
 import { Group, Vector3 } from 'three'
-import { enemyPositions, playerState, useGame, type Enemy as EnemyData } from '../store'
+import { enemyPositions, isFrenzy, playerState, useGame, type Enemy as EnemyData } from '../store'
 
 const CHASE_RANGE = 16
 const SPEED = 2.6
@@ -53,7 +53,8 @@ function Enemy({ enemy }: { enemy: EnemyData }) {
     const dist = dir.length()
 
     if (!stunned) {
-      if (s.dialogue || s.health <= 0 || dist > CHASE_RANGE) {
+      const lostHim = playerState.hidden && !isFrenzy(s) && dist > 2.5
+      if (s.dialogue || s.health <= 0 || dist > CHASE_RANGE || lostHim) {
         b.setLinvel({ x: 0, y: v.y, z: 0 }, true)
       } else if (dist > 0.9) {
         dir.normalize().multiplyScalar(SPEED)

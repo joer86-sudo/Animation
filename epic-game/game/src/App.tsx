@@ -8,6 +8,7 @@ import { useGame } from './store'
 import { Level, Interactions } from './world/Level'
 import { Player } from './world/Player'
 import { Enemies } from './world/Enemies'
+import { Projectiles } from './world/Projectiles'
 import { HUD } from './ui/HUD'
 import { DialogueBox } from './ui/DialogueBox'
 import { TitleScreen } from './ui/TitleScreen'
@@ -19,7 +20,12 @@ export default function App() {
 
   return (
     <KeyboardControls map={keyMap}>
-      <Canvas shadows camera={{ position: [0, 6, 15], fov: 50 }} onPointerDown={() => useGame.getState().attack()}>
+      <Canvas
+        shadows
+        camera={{ position: [0, 6, 15], fov: 50 }}
+        onPointerDown={(e) => (e.button === 2 ? useGame.getState().throwBottle() : useGame.getState().attack())}
+        onContextMenu={(e) => e.preventDefault()}
+      >
         <color attach="background" args={['#14121c']} />
         <fog attach="fog" args={['#1d1a26', 18, 70]} />
         <Sky sunPosition={[-60, 2, -100]} turbidity={8} rayleigh={3} mieCoefficient={0.01} />
@@ -41,6 +47,7 @@ export default function App() {
             <Level />
             <Player />
             <Enemies />
+            <Projectiles />
             <Interactions />
           </Physics>
         </Suspense>
@@ -70,6 +77,8 @@ function useGlobalInput() {
         return
       }
       if (e.code === 'KeyF') g.attack()
+      if (e.code === 'KeyQ') g.throwBottle()
+      if (e.code === 'KeyC') g.drink()
       if (e.code === 'KeyE') g.interact()
       if (e.code === 'KeyR' && g.health <= 0) g.restart()
     }

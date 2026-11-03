@@ -16,7 +16,7 @@ epic-game/
 cd game && npm install && npm run dev      # open http://localhost:5173
 ```
 
-Controls: **WASD** move · **Space** jump · **F** / click attack · **E** interact · **Space/Enter** advance dialogue · **1–9** pick a choice · **R** restart after death.
+Controls: **WASD** move · **Space** jump · **F** / click punch · **Q** / right-click throw bottle · **C** drink · **E** interact · **Space/Enter** advance dialogue · **1–9** pick a choice · **R** restart after death.
 
 ## The stack
 
@@ -28,6 +28,21 @@ Controls: **WASD** move · **Space** jump · **F** / click attack · **E** inter
 | Game state | `zustand` | `store.ts` |
 | Story & dialogue | `inkjs` (Ink scripting language) | `story/story.ink` |
 | Cutscenes | `remotion`, `@remotion/three` | `cutscenes/src/` |
+
+## Gimlet (the hero)
+
+Gimlet is built entirely in code in `game/src/gimlet/`: `Gimlet.tsx` is the model and its procedural
+animation rig (idle slouch, run, punch, overhand throw, drink, frenzy), and `textures.ts` paints the
+tie-dye, plaid, tattoo sleeve and "Danger & Sons" bottle labels onto canvases.
+Open **http://localhost:5173/?view=gimlet** for a turntable viewer with buttons for each move.
+
+His kit (tuning constants at the top of `store.ts`):
+
+- **Bottles**: holds 2, thrown in an arc with real physics, shatter for area damage, refill every 3.5 s
+- **Frenzy meter** fills while he **stands still** (slow), **hides in reeds** (faster, and enemies lose
+  track of him), or **drinks** a bottle (fastest, but he's rooted and takes double damage)
+- **Frenzy** (8 s): faster movement, double damage, faster punches, unlimited bottles, heals 1 heart,
+  and he glows
 
 ## Writing story
 

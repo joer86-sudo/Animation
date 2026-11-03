@@ -15,11 +15,13 @@ VAR enemies_left = 0
     -> reminder
 }
 Mira: You came up the cliff road? Then you've seen it. The lantern on the ridge has gone dark.
+Gimlet: Saw it. Figured somebody forgot to pay the light bill.
 Mira: Without it, the Hollow ones walk freely.
 * [What are the Hollow ones?]
     Mira: Shapes the dark leaves behind. They hate the light, and anyone who carries it.
     -> offer
 * [I'm only passing through.]
+    Gimlet: Just passing through. Places to be, bottles to sell.
     Mira: Nobody "only passes through" Emberfall. Not anymore.
     -> offer
 
@@ -27,7 +29,9 @@ Mira: Without it, the Hollow ones walk freely.
 Mira: Take this ember. Carry it up to the beacon on the ridge and light it again.
 * [I'll do it.]
     ~ quest_accepted = true
+    Gimlet: Danger and Sons. We deliver.
     Mira: Then go. They'll smell the ember on you. Strike first.
+    Mira: And those bottles of yours... if you're going to drink one, find cover first.
     -> END
 * [Find someone else.]
     Mira: There is no one else. Come back when you've decided.
@@ -39,7 +43,8 @@ Mira: The ridge is north, past the old stones. Keep the ember close.
 
 = after
 Mira: Look at it. I'd forgotten how far that light reaches.
-Mira: Emberfall owes you a debt, stranger. Stay a while.
+Mira: Emberfall owes you a debt, Gimlet. Stay a while.
+Gimlet: First round's on me.
 -> END
 
 === beacon ===

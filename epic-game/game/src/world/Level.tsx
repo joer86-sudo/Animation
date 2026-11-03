@@ -8,6 +8,15 @@ import { playerState, useGame } from '../store'
 export const MIRA_POS = new Vector3(2.5, 0, 0)
 export const BEACON_POS = new Vector3(0, 3, -43)
 
+// Tall reeds Gimlet can hide in: builds frenzy and enemies lose track of him.
+export const HIDE_SPOTS: { pos: Vector3; r: number }[] = [
+  { pos: new Vector3(4.5, 0, 4), r: 1.5 },
+  { pos: new Vector3(-6, 0, -9), r: 1.6 },
+  { pos: new Vector3(6, 0, -21), r: 1.6 },
+  { pos: new Vector3(-8.5, 0, -27), r: 1.6 },
+  { pos: new Vector3(5.5, 3, -40), r: 1.5 },
+]
+
 const RAMP_ANGLE = Math.atan2(3, 8)
 const RAMP_LENGTH = Math.hypot(3, 8)
 
@@ -48,6 +57,9 @@ export function Level() {
       <Trees />
       <Mira />
       <Beacon />
+      {HIDE_SPOTS.map((h, i) => (
+        <Reeds key={i} spot={h} seed={i + 3} />
+      ))}
     </>
   )
 }
@@ -226,4 +238,26 @@ export function Interactions() {
     else setPrompt(null)
   })
   return null
+}
+
+function Reeds({ spot, seed }: { spot: { pos: Vector3; r: number }; seed: number }) {
+  const blades = useMemo(() => {
+    let x = seed * 9301
+    const rand = () => ((x = (x * 16807) % 2147483647) / 2147483647)
+    return Array.from({ length: 34 }, () => {
+      const a = rand() * Math.PI * 2
+      const d = Math.sqrt(rand()) * spot.r
+      return { p: [Math.cos(a) * d, 0, Math.sin(a) * d] as [number, number, number], h: 1.4 + rand() * 0.9, lean: (rand() - 0.5) * 0.4, rot: rand() * 3 }
+    })
+  }, [seed, spot.r])
+  return (
+    <group position={spot.pos.toArray()}>
+      {blades.map((b, i) => (
+        <mesh key={i} castShadow position={[b.p[0], b.h / 2, b.p[2]]} rotation={[b.lean, b.rot, b.lean * 0.5]}>
+          <coneGeometry args={[0.07, b.h, 4]} />
+          <meshStandardMaterial color={i % 3 ? '#4b5a2c' : '#6b6a34'} roughness={1} flatShading />
+        </mesh>
+      ))}
+    </group>
+  )
 }
