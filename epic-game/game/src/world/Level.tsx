@@ -2,10 +2,12 @@ import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
 import { CuboidCollider, CylinderCollider, RigidBody } from '@react-three/rapier'
-import { MathUtils, PointLight, Mesh, Vector3 } from 'three'
+import { Group, MathUtils, PointLight, Mesh, Vector3 } from 'three'
 import { playerState, useGame } from '../store'
+import { Saz, type SazPose } from '../characters/Saz'
 
 export const MIRA_POS = new Vector3(2.5, 0, 0)
+export const SAZ_POS = new Vector3(-2.8, 0, -3)
 export const BEACON_POS = new Vector3(0, 3, -43)
 
 // Tall reeds Gimlet can hide in: builds frenzy and enemies lose track of him.
@@ -56,6 +58,7 @@ export function Level() {
       <Stones />
       <Trees />
       <Mira />
+      <SazNpc />
       <Beacon />
       {HIDE_SPOTS.map((h, i) => (
         <Reeds key={i} spot={h} seed={i + 3} />
@@ -233,6 +236,7 @@ export function Interactions() {
     const p = playerState.position
     const { questAccepted, beaconLit } = useGame.getState()
     if (p.distanceTo(MIRA_POS) < 3) setPrompt({ label: 'Talk to Mira', knot: 'mira' })
+    else if (p.distanceTo(SAZ_POS) < 2.6) setPrompt({ label: 'Talk to Saz', knot: 'saz' })
     else if (p.distanceTo(BEACON_POS) < 3.5)
       setPrompt({ label: questAccepted && !beaconLit ? 'Light the beacon' : 'Examine the beacon', knot: 'beacon' })
     else setPrompt(null)
@@ -259,5 +263,38 @@ function Reeds({ spot, seed }: { spot: { pos: Vector3; r: number }; seed: number
         </mesh>
       ))}
     </group>
+  )
+}
+
+// Saz hangs around the village: waves when Gimlet comes near, talks during
+// his conversation, and dances once the beacon is lit.
+function SazNpc() {
+  const pose = useRef<SazPose>({ dancing: false, waveAt: 0, talking: false })
+  const turn = useRef<Group>(null)
+  const near = useRef(false)
+  useFrame((_, dt) => {
+    const g = useGame.getState()
+    const d = playerState.position.distanceTo(SAZ_POS)
+    if (d < 6 && !near.current) pose.current.waveAt = performance.now()
+    near.current = d < 6
+    pose.current.dancing = g.beaconLit && !g.dialogue
+    pose.current.talking = g.dialogue?.speaker === 'Saz'
+    if (turn.current) {
+      const yaw = Math.atan2(playerState.position.x - SAZ_POS.x, playerState.position.z - SAZ_POS.z)
+      const cur = turn.current.rotation.y
+      const delta = Math.atan2(Math.sin(yaw - cur), Math.cos(yaw - cur))
+      if (d < 8) turn.current.rotation.y = cur + delta * Math.min(1, dt * 3)
+    }
+  })
+  return (
+    <RigidBody type="fixed" colliders={false} position={SAZ_POS.toArray()}>
+      <CylinderCollider args={[0.9, 0.35]} position-y={0.9} />
+      <group ref={turn} rotation-y={0.6}>
+        <Saz getPose={() => pose.current} />
+      </group>
+      <Html position={[0, 2.35, 0]} center distanceFactor={10} className="nameplate">
+        Saz
+      </Html>
+    </RigidBody>
   )
 }

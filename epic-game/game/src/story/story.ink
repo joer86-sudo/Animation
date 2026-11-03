@@ -17,23 +17,23 @@ VAR enemies_left = 0
 Mira: You came up the cliff road? Then you've seen it. The lantern on the ridge has gone dark.
 Gimlet: Saw it. Figured somebody forgot to pay the light bill.
 Mira: Without it, the Hollow ones walk freely.
-* [What are the Hollow ones?]
++ [What are the Hollow ones?]
     Mira: Shapes the dark leaves behind. They hate the light, and anyone who carries it.
     -> offer
-* [I'm only passing through.]
++ [I'm only passing through.]
     Gimlet: Just passing through. Places to be, bottles to sell.
     Mira: Nobody "only passes through" Emberfall. Not anymore.
     -> offer
 
 = offer
 Mira: Take this ember. Carry it up to the beacon on the ridge and light it again.
-* [I'll do it.]
++ [I'll do it.]
     ~ quest_accepted = true
     Gimlet: Danger and Sons. We deliver.
     Mira: Then go. They'll smell the ember on you. Strike first.
     Mira: And those bottles of yours... if you're going to drink one, find cover first.
     -> END
-* [Find someone else.]
++ [Find someone else.]
     Mira: There is no one else. Come back when you've decided.
     -> END
 
@@ -61,10 +61,41 @@ Gimlet: First round's on me.
     -> END
 }
 The ember in your hand flickers, as if it knows where it is.
-* [Light the beacon]
++ [Light the beacon]
     ~ beacon_lit = true
     Fire climbs the old iron cage and spills across the valley.
     Far below, the last of the shadows come apart like smoke.
     -> END
-* [Not yet]
++ [Not yet]
     -> END
+
+=== saz ===
+{ beacon_lit:
+    -> party
+}
+{ quest_accepted:
+    -> before_ridge
+}
+Saz: Gimlet! Thought I smelled trouble and cheap glass.
+Gimlet: It's artisanal glass, Saz.
+Saz: Mira's been asking for someone brave. Or someone dumb enough. You fit one of those.
++ [What's going on up there?]
+    Saz: The beacon's out. No light, no music, no dancing. It's a dark age, man.
+    -> END
++ [Read me your arm again.]
+    Saz: Funk. Soul. Jazz. Vibe. Kind. Every word four letters, every one earned.
+    Gimlet: And the one on your hand?
+    Saz: Kind. Because you gotta be, even when it's dark out.
+    -> END
+
+= before_ridge
+Saz: Heard you said yes. Respect. Keep low in the reeds. Those shadows can't see what they can't find.
+Gimlet: Stay still, hide, drink. Got it.
+Saz: I was gonna say "be careful," but sure.
+-> END
+
+= party
+Saz: You did it! Look at that glow. Now THAT'S a dance floor.
+Gimlet: Is that the point-up, point-down?
+Saz: It's the only move that matters, brother.
+-> END

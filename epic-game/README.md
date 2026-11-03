@@ -39,7 +39,7 @@ Controls: **WASD** move · **Space** jump · **F** / click punch · **Q** / righ
 Gimlet is built entirely in code in `game/src/gimlet/`: `Gimlet.tsx` is the model and its procedural
 animation rig (idle slouch, run, punch, overhand throw, drink, frenzy), and `textures.ts` paints the
 tie-dye, plaid, tattoo sleeve and "Danger & Sons" bottle labels onto canvases.
-Open **http://localhost:5173/?view=gimlet** for a turntable viewer with buttons for each move.
+Open **http://localhost:5173/?view=gimlet** (or `?view=saz`) for a turntable viewer with buttons for each move.
 
 His kit (tuning constants at the top of `store.ts`):
 
@@ -49,12 +49,19 @@ His kit (tuning constants at the top of `store.ts`):
 - **Frenzy** (8 s): faster movement, double damage, faster punches, unlimited bottles, heals 1 heart,
   and he glows
 
-## Gimlet handover kit
+## Character handover kits
 
-`gimlet-handover/` holds everything needed to take Gimlet to another project or another Claude:
-`GIMLET_HANDOVER.md` (character bible, kit, rig notes, full source), `gimlet.glb` (the model with named
-joints) and `gimlet-concept.png` (the concept art). Re-export the model any time from the
-**Export .glb** button in the `?view=gimlet` viewer.
+`handover/gimlet/` and `handover/saz/` each hold everything needed to take that character to another
+project or another Claude: a `*_HANDOVER.md` (character bible, rig notes, full source), a `.glb` model with
+named joints, and the concept art. Re-export a model any time with the **Export .glb** button in the
+character viewer (`?view=gimlet` or `?view=saz`).
+
+## Saz
+
+Gimlet's friend in the village, built in `game/src/characters/Saz.tsx` (textures and his word-cloud
+tattoo sleeve in `sazTextures.ts`). He waves when you come near, talks during his conversation and dances
+once the beacon is lit. Shared building blocks for both characters (fingered hands, fabric textures, body
+shapes) live in `game/src/characters/parts.tsx`.
 
 ## Writing story
 

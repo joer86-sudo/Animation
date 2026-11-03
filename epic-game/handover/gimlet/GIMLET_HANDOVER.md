@@ -12,6 +12,8 @@ conversation and it has everything needed to rebuild, extend or reuse him.
 | `gimlet.glb` | The 3D model as a standard glTF binary. Opens in Blender, three.js, Godot, Unity (via glTF importer), Babylon.js, and online glTF viewers |
 | `gimlet-concept.png` | The original concept art. **This is the design reference: when in doubt, match it** |
 
+His friend Saz has his own kit in `../saz/`.
+
 ## Who he is
 
 - **Name:** Gimlet
@@ -36,17 +38,17 @@ much wider than the torso.
 |---|---|---|
 | Skin | Warm tan | `#c98a5e` |
 | Hair | Messy, voluminous mullet, swept fringe, longer at the back | pale sage-blond `#c9d09b` |
-| Face | Narrow, sharp jaw. Half-lidded eyes, one eyebrow raised. Thin curled mustache, small goatee, smirk. Small hoop earrings | facial hair `#2b1d14` |
-| Neck | Small script/feather tattoo on the side of the neck | dark ink |
-| Top | Ragged tie-dye tank top with a big spiral on the chest, deep armholes, a couple of worn holes near the hem | purple `#9b6cb5`, lime `#d8d877`, olive `#a7ad5e`, lilac `#c39ad0` |
+| Face | Narrow, sharp jaw and cheekbones. Half-lidded eyes (whites and dark irises), one eyebrow raised. Thin curled mustache, small goatee, smirking lips. Small hoop earrings | facial hair `#2b1d14` |
+| Neck | Small feather-and-script tattoo ("d&s") on the right side of the neck | dark ink |
+| Top | Shaped (broad chest, narrow waist) ragged tie-dye tank top with a big spiral on the chest, deep armholes, a couple of worn holes near the hem | purple `#9b6cb5`, lime `#d8d877`, olive `#a7ad5e`, lilac `#c39ad0` |
 | Necklace | Red cord with two small round beads | cord `#a3262a`, beads `#d9b77a` |
 | Arms | His **left** arm has a full tattoo sleeve (wings, swirls, stars, a football). His **right** wrist has stacked string bracelets | ink `rgba(40,28,24)`, bracelets red/blue/yellow |
-| Hands | Silver ring on the left hand | `#b8bcc4` |
+| Hands | Fully modelled hands (palm, two-jointed fingers, thumb), relaxed half-curl. Silver ring on the left ring finger | `#b8bcc4` |
 | Underwear | Blue-and-white plaid boxers showing above the belt | `#304eaa` on `#e9edf5` |
 | Belt | Wide, worn brown leather belt, square silver buckle | `#6b3f22` |
 | Holsters | One leather holster on each hip, each holding a green glass "Danger & Sons" bottle with a cork | glass `#2f5c3c`, cork `#b08454` |
-| Pants | Very baggy burnt-orange work/track pants, dusty and worn, two pale stripes down the outer side of each leg, cargo pocket, cuffs bunched over the shoes | `#c8642c`, stripes `#e7cba4` |
-| Shoes | Chunky high-top-style sneakers in cream and sage with **glowing neon-green soles** | `#c9c3ac`, `#7e9670`, soles `#a4ff4c` (emissive) |
+| Pants | Very baggy burnt-orange work/track pants with a dusty twill texture, two pale stripes down the outer side of each leg, a flapped cargo pocket on the right thigh, belt loops, a knee fold, cuffs bunched over the shoes | `#c8642c`, stripes `#e7cba4` |
+| Shoes | Chunky high-top sneakers in cream and sage with a padded ankle collar, tongue and white laces, on **glowing neon-green soles** | `#c9c3ac`, `#7e9670`, soles `#a4ff4c` (emissive) |
 
 **Design guardrails:** keep the tattoos generic (no real club crests or logos) and the sneakers unbranded
 (no swoosh-style marks). The neon soles are his visual signature, so they should always glow at least a little.
@@ -120,7 +122,8 @@ frenzy glow) set to zero intensity, which you can delete.
 
 The code is React Three Fiber (React + three.js). It depends on `react`, `three`, `@react-three/fiber`
 and (for the viewer only) `@react-three/drei`. There are no image files; every texture is painted onto a
-canvas in `textures.ts`.
+canvas in `textures.ts`. Shared pieces (hands, fabric textures, body-shape helper) live in `characters/parts.tsx`,
+so keep that file next to `Gimlet.tsx` (the import path is `../characters/parts`).
 
 Minimal usage:
 
@@ -158,13 +161,15 @@ For the glow to bloom, add `@react-three/postprocessing` with `<Bloom luminanceT
 
 ## Full source
 
-### `Gimlet.tsx`: model and procedural animation rig
+### `gimlet/Gimlet.tsx: model and procedural animation rig`
 
 ```tsx
 import { useLayoutEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { AdditiveBlending, BackSide, DoubleSide, Group, MathUtils, Mesh, MeshStandardMaterial, PointLight } from 'three'
-import { SKIN, labelTexture, plaidTexture, tattooTexture, tieDyeTexture } from './textures'
+import { SKIN, labelTexture, neckTattooTexture, plaidTexture, tattooTexture, tieDyeTexture } from './textures'
+import { Hand, canvasTexture, fabricTexture, rng, useLathe } from '../characters/parts'
+import { LatheGeometry, Vector2 } from 'three'
 
 // What the rig needs to know each frame. The game fills this from the store;
 // the character viewer fills it from buttons.
@@ -230,7 +235,12 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
       tattoo: new MeshStandardMaterial({ map: tex.tattoo, roughness: 0.65 }),
       top: new MeshStandardMaterial({ map: tex.tieDye, roughness: 0.95 }),
       plaid: new MeshStandardMaterial({ map: tex.plaid, roughness: 0.9 }),
-      pants: new MeshStandardMaterial({ color: COLORS.pants, roughness: 0.95 }),
+      pants: new MeshStandardMaterial({ map: canvasTexture(fabricTexture(COLORS.pants, { grain: 0.08, dust: 'rgba(120,80,50,0.16)', dustAmount: 10, seed: 12 }), [2, 2]), roughness: 0.95 }),
+      pantsDark: new MeshStandardMaterial({ color: '#a24f22', roughness: 0.95 }),
+      eyeWhite: new MeshStandardMaterial({ color: '#efe6d8', roughness: 0.3 }),
+      lips: new MeshStandardMaterial({ color: '#9c5a42', roughness: 0.5 }),
+      lace: new MeshStandardMaterial({ color: '#efeadb', roughness: 0.9 }),
+      neckInk: new MeshStandardMaterial({ map: neckTattooTexture(), transparent: true, roughness: 0.7 }),
       stripe: new MeshStandardMaterial({ color: COLORS.pantsStripe, roughness: 0.95 }),
       belt: new MeshStandardMaterial({ color: COLORS.belt, roughness: 0.75 }),
       metal: new MeshStandardMaterial({ color: COLORS.buckle, metalness: 0.9, roughness: 0.3 }),
@@ -247,6 +257,20 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
       bead: new MeshStandardMaterial({ color: '#d9b77a', roughness: 0.6 }),
     }),
     [tex],
+  )
+
+  const torsoGeo = useLathe([
+    [0.17, 0.0], [0.175, 0.1], [0.19, 0.2], [0.225, 0.32], [0.235, 0.4], [0.2, 0.46], [0.13, 0.49],
+  ])
+  const bottleGeo = useMemo(
+    () =>
+      new LatheGeometry(
+        [[0, -0.07], [0.042, -0.07], [0.046, -0.06], [0.046, 0.035], [0.04, 0.055], [0.022, 0.075], [0.017, 0.085], [0.017, 0.118], [0.02, 0.122], [0.0, 0.122]].map(
+          ([r, y]) => new Vector2(r, y),
+        ),
+        16,
+      ),
+    [],
   )
 
   useLayoutEffect(() => {
@@ -366,16 +390,8 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
 
   const Bottle = ({ withLabel = true }: { withLabel?: boolean }) => (
     <group>
-      <mesh material={mats.glass}>
-        <cylinderGeometry args={[0.045, 0.045, 0.13, 14]} />
-      </mesh>
-      <mesh material={mats.glass} position-y={0.08}>
-        <cylinderGeometry args={[0.018, 0.04, 0.04, 12]} />
-      </mesh>
-      <mesh material={mats.glass} position-y={0.115}>
-        <cylinderGeometry args={[0.017, 0.017, 0.035, 10]} />
-      </mesh>
-      <mesh material={mats.cork} position-y={0.14}>
+      <mesh material={mats.glass} geometry={bottleGeo} />
+      <mesh material={mats.cork} position-y={0.132}>
         <cylinderGeometry args={[0.014, 0.016, 0.025, 8]} />
       </mesh>
       {withLabel && (
@@ -408,6 +424,21 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
         <cylinderGeometry args={[0.135, 0.15, 0.5, 14]} />
       </mesh>
       <Stripes side={side} y={-0.24} len={0.48} r0={0.137} r1={0.15} />
+      {side === -1 && (
+        <group rotation-y={-0.9} position-y={-0.27}>
+          <mesh material={mats.pants} position-z={0.15}>
+            <boxGeometry args={[0.11, 0.13, 0.03]} />
+          </mesh>
+          <mesh material={mats.pantsDark} position={[0, 0.06, 0.166]}>
+            <boxGeometry args={[0.115, 0.03, 0.012]} />
+          </mesh>
+        </group>
+      )}
+      {[-0.4].map((y) => (
+        <mesh key={y} material={mats.pantsDark} position-y={y} rotation-x={Math.PI / 2} scale={[1, 1, 0.5]}>
+          <torusGeometry args={[0.15, 0.005, 6, 18, Math.PI]} />
+        </mesh>
+      ))}
       <group ref={knee} name={side === 1 ? 'knee_L' : 'knee_R'} position-y={-0.47}>
         <mesh material={mats.pants} position-y={-0.19}>
           <cylinderGeometry args={[0.15, 0.2, 0.38, 14]} />
@@ -431,6 +462,17 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
           <mesh material={mats.shoeAccent} position={[side * 0.083, 0.0, 0.03]}>
             <boxGeometry args={[0.005, 0.04, 0.14]} />
           </mesh>
+          <mesh material={mats.shoe} position={[0, 0.06, -0.04]}>
+            <cylinderGeometry args={[0.075, 0.085, 0.07, 14]} />
+          </mesh>
+          <mesh material={mats.shoe} position={[0, 0.07, 0.04]} rotation-x={-0.4}>
+            <boxGeometry args={[0.07, 0.1, 0.02]} />
+          </mesh>
+          {[0.0, 0.035, 0.07].map((z) => (
+            <mesh key={z} material={mats.lace} position={[0, 0.048 - z * 0.25, 0.05 + z]}>
+              <boxGeometry args={[0.07, 0.006, 0.008]} />
+            </mesh>
+          ))}
           <mesh material={mats.sole} position-y={-0.06}>
             <boxGeometry args={[0.175, 0.035, 0.32]} />
           </mesh>
@@ -457,7 +499,10 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
         <sphereGeometry args={[0.072, 14, 12]} />
       </mesh>
       <mesh material={skin} position-y={-0.15}>
-        <capsuleGeometry args={[0.058, 0.2, 6, 12]} />
+        <capsuleGeometry args={[0.056, 0.2, 6, 12]} />
+      </mesh>
+      <mesh material={skin} position={[0, -0.13, 0.018]} scale={[0.9, 1.4, 0.9]}>
+        <sphereGeometry args={[0.05, 12, 10]} />
       </mesh>
       <group ref={elbow} name={side === 1 ? 'elbow_L' : 'elbow_R'} position-y={-0.3}>
         <mesh material={skin} position-y={-0.13}>
@@ -471,14 +516,7 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
             </mesh>
           ))}
         <group position-y={-0.3}>
-          <mesh material={mats.skin} position-y={-0.03}>
-            <boxGeometry args={[0.07, 0.1, 0.04]} />
-          </mesh>
-          {side === 1 && (
-            <mesh material={mats.metal} position={[0, -0.07, 0.012]} rotation-x={Math.PI / 2}>
-              <torusGeometry args={[0.012, 0.004, 6, 12]} />
-            </mesh>
-          )}
+          <Hand side={side} skin={mats.skin} ring={side === 1 ? mats.metal : undefined} curl={0.45} />
           <group ref={handBottle} position={[0, -0.06, 0.04]} rotation-x={side === 1 ? Math.PI * 0.9 : 0} visible={false}>
             <Bottle withLabel={false} />
           </group>
@@ -500,6 +538,11 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
         <mesh material={mats.belt} position-y={0.03}>
           <cylinderGeometry args={[0.205, 0.21, 0.06, 18]} />
         </mesh>
+        {[0.6, 1.4, 2.6, 3.6, 4.8, 5.7].map((a) => (
+          <mesh key={a} material={mats.belt} position={[Math.sin(a) * 0.21, 0.03, Math.cos(a) * 0.21]} rotation-y={a}>
+            <boxGeometry args={[0.018, 0.08, 0.008]} />
+          </mesh>
+        ))}
         <mesh material={mats.metal} position={[0, 0.03, 0.212]}>
           <boxGeometry args={[0.07, 0.055, 0.012]} />
         </mesh>
@@ -522,9 +565,7 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
 
         <group ref={spine} name="spine" position-y={0.1}>
           {/* tank top torso (rotated so the spiral faces forward) */}
-          <mesh material={mats.top} position-y={0.22} rotation-y={Math.PI} scale={[1, 1, 0.72]}>
-            <cylinderGeometry args={[0.235, 0.19, 0.48, 20, 1]} />
-          </mesh>
+          <mesh material={mats.top} geometry={torsoGeo} position-y={-0.02} rotation-y={Math.PI} scale={[1, 1, 0.72]} />
           {/* tank top shoulder straps */}
           {[-1, 1].map((s) => (
             <mesh key={s} material={mats.top} position={[s * 0.12, 0.47, 0]} scale={[1, 1, 0.72]}>
@@ -567,33 +608,37 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
   )
 }
 
-type Mats = Record<'skin' | 'hair' | 'facial' | 'eye' | 'metal', MeshStandardMaterial>
+type Mats = Record<'skin' | 'hair' | 'facial' | 'eye' | 'metal' | 'eyeWhite' | 'lips' | 'neckInk', MeshStandardMaterial>
 
 function Head({ mats }: { mats: Mats }) {
   // Messy mullet: seeded tufts so the silhouette is the same every load.
   const tufts = useMemo(() => {
-    let seed = 11
-    const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647)
+    const rand = rng(11)
     const out: { pos: [number, number, number]; rot: [number, number, number]; s: number }[] = []
     // crown & sides
-    for (let i = 0; i < 16; i++) {
-      const a = (i / 16) * Math.PI * 2
+    for (let i = 0; i < 30; i++) {
+      const a = (i / 30) * Math.PI * 2 + rand() * 0.2
       const front = Math.cos(a) > 0.55 // skip the face
       if (front) continue
       out.push({
-        pos: [Math.sin(a) * 0.12, 0.2 + rand() * 0.05, Math.cos(a) * 0.11 - 0.01],
+        pos: [Math.sin(a) * (0.11 + rand() * 0.025), 0.18 + rand() * 0.08, Math.cos(a) * (0.1 + rand() * 0.02) - 0.01],
         rot: [Math.cos(a) * -1.1 + (rand() - 0.5) * 0.4, 0, Math.sin(a) * 1.1 + (rand() - 0.5) * 0.4],
         s: 0.9 + rand() * 0.5,
       })
     }
     // long back (mullet) hanging toward the shoulders
-    for (let i = 0; i < 9; i++) {
-      const x = (i / 8 - 0.5) * 0.24
+    for (let i = 0; i < 16; i++) {
+      const x = (i / 15 - 0.5) * 0.26
       out.push({ pos: [x, 0.04 - rand() * 0.06, -0.1], rot: [2.6 + (rand() - 0.5) * 0.5, 0, x * 3], s: 1.2 + rand() * 0.6 })
     }
     // swept fringe
-    for (let i = 0; i < 4; i++) {
-      out.push({ pos: [0.03 + i * 0.03, 0.24 - i * 0.012, 0.08], rot: [0.9, 0, -1.3 - i * 0.15], s: 0.9 + rand() * 0.3 })
+    for (let i = 0; i < 7; i++) {
+      out.push({ pos: [-0.02 + i * 0.022, 0.25 - i * 0.01, 0.075 + rand() * 0.015], rot: [0.9 + rand() * 0.3, 0, -1.3 - i * 0.12], s: 0.85 + rand() * 0.35 })
+    }
+    // curly ends flicking out at the nape
+    for (let i = 0; i < 8; i++) {
+      const x = (i / 7 - 0.5) * 0.28
+      out.push({ pos: [x, -0.04 - rand() * 0.03, -0.075], rot: [2.2, (rand() - 0.5) * 0.8, x * 6], s: 0.8 + rand() * 0.4 })
     }
     return out
   }, [])
@@ -621,8 +666,11 @@ function Head({ mats }: { mats: Mats }) {
       {/* eyes, smug half-lidded */}
       {[-1, 1].map((s) => (
         <group key={s} position={[s * 0.045, 0.135, 0.112]}>
-          <mesh material={mats.eye} scale={[1, 0.55, 0.5]}>
-            <sphereGeometry args={[0.018, 10, 8]} />
+          <mesh material={mats.eyeWhite} scale={[1, 0.6, 0.55]}>
+            <sphereGeometry args={[0.018, 12, 10]} />
+          </mesh>
+          <mesh material={mats.eye} position-z={0.009} scale={[1, 0.8, 0.5]}>
+            <sphereGeometry args={[0.0095, 10, 8]} />
           </mesh>
           {/* heavy lid */}
           <mesh material={mats.skin} position={[0, 0.009, 0.002]} scale={[1.2, 0.5, 0.6]}>
@@ -645,8 +693,18 @@ function Head({ mats }: { mats: Mats }) {
         </mesh>
       ))}
       {/* smirk */}
-      <mesh material={mats.facial} position={[0.008, 0.048, 0.118]} rotation-z={0.18}>
-        <boxGeometry args={[0.04, 0.005, 0.006]} />
+      <mesh material={mats.lips} position={[0.006, 0.05, 0.117]} rotation-z={Math.PI / 2 + 0.18} scale={[1, 1, 0.55]}>
+        <capsuleGeometry args={[0.0065, 0.03, 4, 8]} />
+      </mesh>
+      {/* cheekbones */}
+      {[-1, 1].map((s) => (
+        <mesh key={s} material={mats.skin} position={[s * 0.058, 0.098, 0.068]} scale={[1, 0.65, 0.7]}>
+          <sphereGeometry args={[0.03, 12, 10]} />
+        </mesh>
+      ))}
+      {/* neck tattoo (his right side) */}
+      <mesh material={mats.neckInk} position={[-0.062, -0.04, 0.02]} rotation-y={-1.25}>
+        <planeGeometry args={[0.06, 0.07]} />
       </mesh>
       {/* goatee */}
       <mesh material={mats.facial} position={[0, 0.0, 0.098]} scale={[1.1, 1.2, 0.55]}>
@@ -666,7 +724,7 @@ function Head({ mats }: { mats: Mats }) {
 }
 ```
 
-### `textures.ts`: painted textures (tie-dye, plaid, label, tattoo sleeve)
+### `gimlet/textures.ts: painted textures`
 
 ```ts
 import { CanvasTexture, RepeatWrapping, SRGBColorSpace } from 'three'
@@ -849,4 +907,194 @@ export function tattooTexture() {
   }
   return toTexture(c)
 }
+
+// Small script-and-feather tattoo on the side of his neck (transparent background).
+export function neckTattooTexture() {
+  const [c, ctx] = canvas(128, 128)
+  ctx.strokeStyle = 'rgba(40,28,24,0.85)'
+  ctx.fillStyle = 'rgba(40,28,24,0.85)'
+  ctx.lineWidth = 3
+  ctx.lineCap = 'round'
+  ctx.beginPath()
+  ctx.moveTo(30, 100)
+  ctx.bezierCurveTo(50, 70, 70, 50, 100, 24)
+  ctx.stroke()
+  for (let i = 0; i < 6; i++) {
+    const t = i / 6
+    const x = 30 + t * 70
+    const y = 100 - t * 76
+    ctx.beginPath()
+    ctx.moveTo(x, y)
+    ctx.lineTo(x - 14 + i, y - 4)
+    ctx.moveTo(x, y)
+    ctx.lineTo(x + 4, y + 12 - i)
+    ctx.stroke()
+  }
+  ctx.font = 'italic 18px Georgia, serif'
+  ctx.fillText('d&s', 14, 122)
+  return toTexture(c)
+}
 ```
+
+### `characters/parts.tsx: shared hands, fabric and shape helpers`
+
+```tsx
+import { useMemo } from 'react'
+import { CanvasTexture, LatheGeometry, Material, RepeatWrapping, SRGBColorSpace, Vector2 } from 'three'
+
+// Shared building blocks for the hand-built characters.
+
+/** Round body section from (radius, height) pairs, bottom to top. Front (+Z) is u = 0. */
+export function useLathe(profile: [number, number][], segments = 24) {
+  return useMemo(() => new LatheGeometry(profile.map(([r, y]) => new Vector2(r, y)), segments), [profile, segments])
+}
+
+/**
+ * A hand hanging down from the wrist: palm faces the body, back of the hand faces out.
+ * `side` is +1 for the character's left hand (+X), -1 for the right.
+ */
+export function Hand({
+  side,
+  skin,
+  curl = 0.35,
+  backDecal,
+  ring,
+}: {
+  side: 1 | -1
+  skin: Material
+  curl?: number
+  backDecal?: Material
+  ring?: Material
+}) {
+  const fingers = [
+    { z: 0.026, len: 0.04 }, // index (front)
+    { z: 0.009, len: 0.046 },
+    { z: -0.008, len: 0.043 },
+    { z: -0.024, len: 0.034 }, // pinky
+  ]
+  return (
+    <group>
+      {/* palm */}
+      <mesh material={skin} position-y={-0.035} scale={[1, 1, 1]}>
+        <boxGeometry args={[0.028, 0.072, 0.07]} />
+      </mesh>
+      <mesh material={skin} position={[0, -0.003, 0]} scale={[0.6, 0.45, 1]}>
+        <sphereGeometry args={[0.035, 12, 8]} />
+      </mesh>
+      {backDecal && (
+        <mesh material={backDecal} position={[side * 0.0145, -0.036, 0]} rotation-y={side * (Math.PI / 2)}>
+          <planeGeometry args={[0.062, 0.062]} />
+        </mesh>
+      )}
+      {fingers.map((f, i) => (
+        <group key={i} position={[0, -0.07, f.z]} rotation-z={-side * curl * 0.6}>
+          <mesh material={skin} position-y={-f.len * 0.25}>
+            <capsuleGeometry args={[0.0085, f.len * 0.5, 4, 8]} />
+          </mesh>
+          <group position-y={-f.len * 0.55} rotation-z={-side * curl}>
+            <mesh material={skin} position-y={-f.len * 0.22}>
+              <capsuleGeometry args={[0.0078, f.len * 0.42, 4, 8]} />
+            </mesh>
+          </group>
+          {ring && i === 2 && (
+            <mesh material={ring} position-y={-f.len * 0.3} rotation-z={Math.PI / 2}>
+              <torusGeometry args={[0.011, 0.0028, 6, 12]} />
+            </mesh>
+          )}
+        </group>
+      ))}
+      {/* thumb, angled forward and in */}
+      <group position={[-side * 0.008, -0.025, 0.033]} rotation={[0.5, 0, -side * 0.45]}>
+        <mesh material={skin} position-y={-0.018}>
+          <capsuleGeometry args={[0.01, 0.03, 4, 8]} />
+        </mesh>
+      </group>
+    </group>
+  )
+}
+
+// ---- canvas helpers ------------------------------------------------------
+
+export function makeCanvas(w: number, h: number) {
+  const c = document.createElement('canvas')
+  c.width = w
+  c.height = h
+  return [c, c.getContext('2d')!] as const
+}
+
+export function canvasTexture(c: HTMLCanvasElement, repeat?: [number, number]) {
+  const t = new CanvasTexture(c)
+  t.colorSpace = SRGBColorSpace
+  t.anisotropy = 4
+  if (repeat) {
+    t.wrapS = t.wrapT = RepeatWrapping
+    t.repeat.set(...repeat)
+  }
+  return t
+}
+
+/** Seeded RNG so procedural details are identical on every load. */
+export function rng(seed: number) {
+  let s = seed % 2147483647 || 1
+  return () => (s = (s * 16807) % 2147483647) / 2147483647
+}
+
+/** Base colour with woven grain and optional dusty smudges. */
+export function fabricTexture(base: string, opts: { grain?: number; dust?: string; dustAmount?: number; seed?: number; size?: number } = {}) {
+  const size = opts.size ?? 256
+  const [c, ctx] = makeCanvas(size, size)
+  ctx.fillStyle = base
+  ctx.fillRect(0, 0, size, size)
+  const rand = rng(opts.seed ?? 5)
+  const grain = opts.grain ?? 0.06
+  // twill lines
+  for (let i = -size; i < size * 2; i += 3) {
+    ctx.strokeStyle = `rgba(0,0,0,${grain * (0.5 + rand())})`
+    ctx.beginPath()
+    ctx.moveTo(i, 0)
+    ctx.lineTo(i + size * 0.5, size)
+    ctx.stroke()
+  }
+  // speckle
+  for (let i = 0; i < size * 6; i++) {
+    ctx.fillStyle = rand() > 0.5 ? `rgba(255,255,255,${grain})` : `rgba(0,0,0,${grain})`
+    ctx.fillRect(rand() * size, rand() * size, 1, 1)
+  }
+  if (opts.dust) {
+    for (let i = 0; i < (opts.dustAmount ?? 14); i++) {
+      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1)
+      g.addColorStop(0, opts.dust)
+      g.addColorStop(1, 'rgba(0,0,0,0)')
+      ctx.save()
+      ctx.translate(rand() * size, rand() * size)
+      ctx.scale(8 + rand() * 26, 6 + rand() * 18)
+      ctx.fillStyle = g
+      ctx.beginPath()
+      ctx.arc(0, 0, 1, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.restore()
+    }
+  }
+  return c
+}
+
+/** Skin with fine body hair, for forearms. */
+export function hairySkin(ctx: CanvasRenderingContext2D, w: number, h: number, skin: string, hair: string, density = 900, seed = 9) {
+  ctx.fillStyle = skin
+  ctx.fillRect(0, 0, w, h)
+  const rand = rng(seed)
+  ctx.strokeStyle = hair
+  ctx.lineWidth = 1
+  for (let i = 0; i < density; i++) {
+    const x = rand() * w
+    const y = rand() * h
+    ctx.globalAlpha = 0.15 + rand() * 0.3
+    ctx.beginPath()
+    ctx.moveTo(x, y)
+    ctx.lineTo(x + (rand() - 0.5) * 3, y + 3 + rand() * 4)
+    ctx.stroke()
+  }
+  ctx.globalAlpha = 1
+}
+```
+

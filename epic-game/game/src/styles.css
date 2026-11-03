@@ -105,3 +105,5 @@ button:hover { background: rgba(255, 140, 40, 0.25); }
 .act.big { background: rgba(255, 140, 40, 0.3); }
 .act.wide { grid-column: 1 / -1; width: 138px; height: 40px; border-radius: 20px; }
 @media (pointer: coarse) { .help { display: none; } .prompt { display: none; } }
+.viewer-bar .who { display: flex; gap: 4px; padding-right: 8px; margin-right: 2px; border-right: 1px solid var(--border); }
+.viewer-bar .who button { font-size: 0.95rem; }

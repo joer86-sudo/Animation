@@ -7,5 +7,5 @@ import './styles.css'
 const view = new URLSearchParams(location.search).get('view')
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>{view === 'gimlet' ? <CharacterViewer /> : <App />}</StrictMode>,
+  <StrictMode>{view === 'gimlet' || view === 'saz' ? <CharacterViewer /> : <App />}</StrictMode>,
 )

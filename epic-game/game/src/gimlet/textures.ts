@@ -178,3 +178,30 @@ export function tattooTexture() {
   }
   return toTexture(c)
 }
+
+// Small script-and-feather tattoo on the side of his neck (transparent background).
+export function neckTattooTexture() {
+  const [c, ctx] = canvas(128, 128)
+  ctx.strokeStyle = 'rgba(40,28,24,0.85)'
+  ctx.fillStyle = 'rgba(40,28,24,0.85)'
+  ctx.lineWidth = 3
+  ctx.lineCap = 'round'
+  ctx.beginPath()
+  ctx.moveTo(30, 100)
+  ctx.bezierCurveTo(50, 70, 70, 50, 100, 24)
+  ctx.stroke()
+  for (let i = 0; i < 6; i++) {
+    const t = i / 6
+    const x = 30 + t * 70
+    const y = 100 - t * 76
+    ctx.beginPath()
+    ctx.moveTo(x, y)
+    ctx.lineTo(x - 14 + i, y - 4)
+    ctx.moveTo(x, y)
+    ctx.lineTo(x + 4, y + 12 - i)
+    ctx.stroke()
+  }
+  ctx.font = 'italic 18px Georgia, serif'
+  ctx.fillText('d&s', 14, 122)
+  return toTexture(c)
+}

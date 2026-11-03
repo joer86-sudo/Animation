@@ -1,7 +1,9 @@
 import { useLayoutEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { AdditiveBlending, BackSide, DoubleSide, Group, MathUtils, Mesh, MeshStandardMaterial, PointLight } from 'three'
-import { SKIN, labelTexture, plaidTexture, tattooTexture, tieDyeTexture } from './textures'
+import { SKIN, labelTexture, neckTattooTexture, plaidTexture, tattooTexture, tieDyeTexture } from './textures'
+import { Hand, canvasTexture, fabricTexture, rng, useLathe } from '../characters/parts'
+import { LatheGeometry, Vector2 } from 'three'
 
 // What the rig needs to know each frame. The game fills this from the store;
 // the character viewer fills it from buttons.
@@ -67,7 +69,12 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
       tattoo: new MeshStandardMaterial({ map: tex.tattoo, roughness: 0.65 }),
       top: new MeshStandardMaterial({ map: tex.tieDye, roughness: 0.95 }),
       plaid: new MeshStandardMaterial({ map: tex.plaid, roughness: 0.9 }),
-      pants: new MeshStandardMaterial({ color: COLORS.pants, roughness: 0.95 }),
+      pants: new MeshStandardMaterial({ map: canvasTexture(fabricTexture(COLORS.pants, { grain: 0.08, dust: 'rgba(120,80,50,0.16)', dustAmount: 10, seed: 12 }), [2, 2]), roughness: 0.95 }),
+      pantsDark: new MeshStandardMaterial({ color: '#a24f22', roughness: 0.95 }),
+      eyeWhite: new MeshStandardMaterial({ color: '#efe6d8', roughness: 0.3 }),
+      lips: new MeshStandardMaterial({ color: '#9c5a42', roughness: 0.5 }),
+      lace: new MeshStandardMaterial({ color: '#efeadb', roughness: 0.9 }),
+      neckInk: new MeshStandardMaterial({ map: neckTattooTexture(), transparent: true, roughness: 0.7 }),
       stripe: new MeshStandardMaterial({ color: COLORS.pantsStripe, roughness: 0.95 }),
       belt: new MeshStandardMaterial({ color: COLORS.belt, roughness: 0.75 }),
       metal: new MeshStandardMaterial({ color: COLORS.buckle, metalness: 0.9, roughness: 0.3 }),
@@ -84,6 +91,20 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
       bead: new MeshStandardMaterial({ color: '#d9b77a', roughness: 0.6 }),
     }),
     [tex],
+  )
+
+  const torsoGeo = useLathe([
+    [0.17, 0.0], [0.175, 0.1], [0.19, 0.2], [0.225, 0.32], [0.235, 0.4], [0.2, 0.46], [0.13, 0.49],
+  ])
+  const bottleGeo = useMemo(
+    () =>
+      new LatheGeometry(
+        [[0, -0.07], [0.042, -0.07], [0.046, -0.06], [0.046, 0.035], [0.04, 0.055], [0.022, 0.075], [0.017, 0.085], [0.017, 0.118], [0.02, 0.122], [0.0, 0.122]].map(
+          ([r, y]) => new Vector2(r, y),
+        ),
+        16,
+      ),
+    [],
   )
 
   useLayoutEffect(() => {
@@ -203,16 +224,8 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
 
   const Bottle = ({ withLabel = true }: { withLabel?: boolean }) => (
     <group>
-      <mesh material={mats.glass}>
-        <cylinderGeometry args={[0.045, 0.045, 0.13, 14]} />
-      </mesh>
-      <mesh material={mats.glass} position-y={0.08}>
-        <cylinderGeometry args={[0.018, 0.04, 0.04, 12]} />
-      </mesh>
-      <mesh material={mats.glass} position-y={0.115}>
-        <cylinderGeometry args={[0.017, 0.017, 0.035, 10]} />
-      </mesh>
-      <mesh material={mats.cork} position-y={0.14}>
+      <mesh material={mats.glass} geometry={bottleGeo} />
+      <mesh material={mats.cork} position-y={0.132}>
         <cylinderGeometry args={[0.014, 0.016, 0.025, 8]} />
       </mesh>
       {withLabel && (
@@ -245,6 +258,21 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
         <cylinderGeometry args={[0.135, 0.15, 0.5, 14]} />
       </mesh>
       <Stripes side={side} y={-0.24} len={0.48} r0={0.137} r1={0.15} />
+      {side === -1 && (
+        <group rotation-y={-0.9} position-y={-0.27}>
+          <mesh material={mats.pants} position-z={0.15}>
+            <boxGeometry args={[0.11, 0.13, 0.03]} />
+          </mesh>
+          <mesh material={mats.pantsDark} position={[0, 0.06, 0.166]}>
+            <boxGeometry args={[0.115, 0.03, 0.012]} />
+          </mesh>
+        </group>
+      )}
+      {[-0.4].map((y) => (
+        <mesh key={y} material={mats.pantsDark} position-y={y} rotation-x={Math.PI / 2} scale={[1, 1, 0.5]}>
+          <torusGeometry args={[0.15, 0.005, 6, 18, Math.PI]} />
+        </mesh>
+      ))}
       <group ref={knee} name={side === 1 ? 'knee_L' : 'knee_R'} position-y={-0.47}>
         <mesh material={mats.pants} position-y={-0.19}>
           <cylinderGeometry args={[0.15, 0.2, 0.38, 14]} />
@@ -268,6 +296,17 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
           <mesh material={mats.shoeAccent} position={[side * 0.083, 0.0, 0.03]}>
             <boxGeometry args={[0.005, 0.04, 0.14]} />
           </mesh>
+          <mesh material={mats.shoe} position={[0, 0.06, -0.04]}>
+            <cylinderGeometry args={[0.075, 0.085, 0.07, 14]} />
+          </mesh>
+          <mesh material={mats.shoe} position={[0, 0.07, 0.04]} rotation-x={-0.4}>
+            <boxGeometry args={[0.07, 0.1, 0.02]} />
+          </mesh>
+          {[0.0, 0.035, 0.07].map((z) => (
+            <mesh key={z} material={mats.lace} position={[0, 0.048 - z * 0.25, 0.05 + z]}>
+              <boxGeometry args={[0.07, 0.006, 0.008]} />
+            </mesh>
+          ))}
           <mesh material={mats.sole} position-y={-0.06}>
             <boxGeometry args={[0.175, 0.035, 0.32]} />
           </mesh>
@@ -294,7 +333,10 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
         <sphereGeometry args={[0.072, 14, 12]} />
       </mesh>
       <mesh material={skin} position-y={-0.15}>
-        <capsuleGeometry args={[0.058, 0.2, 6, 12]} />
+        <capsuleGeometry args={[0.056, 0.2, 6, 12]} />
+      </mesh>
+      <mesh material={skin} position={[0, -0.13, 0.018]} scale={[0.9, 1.4, 0.9]}>
+        <sphereGeometry args={[0.05, 12, 10]} />
       </mesh>
       <group ref={elbow} name={side === 1 ? 'elbow_L' : 'elbow_R'} position-y={-0.3}>
         <mesh material={skin} position-y={-0.13}>
@@ -308,14 +350,7 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
             </mesh>
           ))}
         <group position-y={-0.3}>
-          <mesh material={mats.skin} position-y={-0.03}>
-            <boxGeometry args={[0.07, 0.1, 0.04]} />
-          </mesh>
-          {side === 1 && (
-            <mesh material={mats.metal} position={[0, -0.07, 0.012]} rotation-x={Math.PI / 2}>
-              <torusGeometry args={[0.012, 0.004, 6, 12]} />
-            </mesh>
-          )}
+          <Hand side={side} skin={mats.skin} ring={side === 1 ? mats.metal : undefined} curl={0.45} />
           <group ref={handBottle} position={[0, -0.06, 0.04]} rotation-x={side === 1 ? Math.PI * 0.9 : 0} visible={false}>
             <Bottle withLabel={false} />
           </group>
@@ -337,6 +372,11 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
         <mesh material={mats.belt} position-y={0.03}>
           <cylinderGeometry args={[0.205, 0.21, 0.06, 18]} />
         </mesh>
+        {[0.6, 1.4, 2.6, 3.6, 4.8, 5.7].map((a) => (
+          <mesh key={a} material={mats.belt} position={[Math.sin(a) * 0.21, 0.03, Math.cos(a) * 0.21]} rotation-y={a}>
+            <boxGeometry args={[0.018, 0.08, 0.008]} />
+          </mesh>
+        ))}
         <mesh material={mats.metal} position={[0, 0.03, 0.212]}>
           <boxGeometry args={[0.07, 0.055, 0.012]} />
         </mesh>
@@ -359,9 +399,7 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
 
         <group ref={spine} name="spine" position-y={0.1}>
           {/* tank top torso (rotated so the spiral faces forward) */}
-          <mesh material={mats.top} position-y={0.22} rotation-y={Math.PI} scale={[1, 1, 0.72]}>
-            <cylinderGeometry args={[0.235, 0.19, 0.48, 20, 1]} />
-          </mesh>
+          <mesh material={mats.top} geometry={torsoGeo} position-y={-0.02} rotation-y={Math.PI} scale={[1, 1, 0.72]} />
           {/* tank top shoulder straps */}
           {[-1, 1].map((s) => (
             <mesh key={s} material={mats.top} position={[s * 0.12, 0.47, 0]} scale={[1, 1, 0.72]}>
@@ -404,33 +442,37 @@ export function Gimlet({ getPose }: { getPose: () => GimletPose }) {
   )
 }
 
-type Mats = Record<'skin' | 'hair' | 'facial' | 'eye' | 'metal', MeshStandardMaterial>
+type Mats = Record<'skin' | 'hair' | 'facial' | 'eye' | 'metal' | 'eyeWhite' | 'lips' | 'neckInk', MeshStandardMaterial>
 
 function Head({ mats }: { mats: Mats }) {
   // Messy mullet: seeded tufts so the silhouette is the same every load.
   const tufts = useMemo(() => {
-    let seed = 11
-    const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647)
+    const rand = rng(11)
     const out: { pos: [number, number, number]; rot: [number, number, number]; s: number }[] = []
     // crown & sides
-    for (let i = 0; i < 16; i++) {
-      const a = (i / 16) * Math.PI * 2
+    for (let i = 0; i < 30; i++) {
+      const a = (i / 30) * Math.PI * 2 + rand() * 0.2
       const front = Math.cos(a) > 0.55 // skip the face
       if (front) continue
       out.push({
-        pos: [Math.sin(a) * 0.12, 0.2 + rand() * 0.05, Math.cos(a) * 0.11 - 0.01],
+        pos: [Math.sin(a) * (0.11 + rand() * 0.025), 0.18 + rand() * 0.08, Math.cos(a) * (0.1 + rand() * 0.02) - 0.01],
         rot: [Math.cos(a) * -1.1 + (rand() - 0.5) * 0.4, 0, Math.sin(a) * 1.1 + (rand() - 0.5) * 0.4],
         s: 0.9 + rand() * 0.5,
       })
     }
     // long back (mullet) hanging toward the shoulders
-    for (let i = 0; i < 9; i++) {
-      const x = (i / 8 - 0.5) * 0.24
+    for (let i = 0; i < 16; i++) {
+      const x = (i / 15 - 0.5) * 0.26
       out.push({ pos: [x, 0.04 - rand() * 0.06, -0.1], rot: [2.6 + (rand() - 0.5) * 0.5, 0, x * 3], s: 1.2 + rand() * 0.6 })
     }
     // swept fringe
-    for (let i = 0; i < 4; i++) {
-      out.push({ pos: [0.03 + i * 0.03, 0.24 - i * 0.012, 0.08], rot: [0.9, 0, -1.3 - i * 0.15], s: 0.9 + rand() * 0.3 })
+    for (let i = 0; i < 7; i++) {
+      out.push({ pos: [-0.02 + i * 0.022, 0.25 - i * 0.01, 0.075 + rand() * 0.015], rot: [0.9 + rand() * 0.3, 0, -1.3 - i * 0.12], s: 0.85 + rand() * 0.35 })
+    }
+    // curly ends flicking out at the nape
+    for (let i = 0; i < 8; i++) {
+      const x = (i / 7 - 0.5) * 0.28
+      out.push({ pos: [x, -0.04 - rand() * 0.03, -0.075], rot: [2.2, (rand() - 0.5) * 0.8, x * 6], s: 0.8 + rand() * 0.4 })
     }
     return out
   }, [])
@@ -458,8 +500,11 @@ function Head({ mats }: { mats: Mats }) {
       {/* eyes, smug half-lidded */}
       {[-1, 1].map((s) => (
         <group key={s} position={[s * 0.045, 0.135, 0.112]}>
-          <mesh material={mats.eye} scale={[1, 0.55, 0.5]}>
-            <sphereGeometry args={[0.018, 10, 8]} />
+          <mesh material={mats.eyeWhite} scale={[1, 0.6, 0.55]}>
+            <sphereGeometry args={[0.018, 12, 10]} />
+          </mesh>
+          <mesh material={mats.eye} position-z={0.009} scale={[1, 0.8, 0.5]}>
+            <sphereGeometry args={[0.0095, 10, 8]} />
           </mesh>
           {/* heavy lid */}
           <mesh material={mats.skin} position={[0, 0.009, 0.002]} scale={[1.2, 0.5, 0.6]}>
@@ -482,8 +527,18 @@ function Head({ mats }: { mats: Mats }) {
         </mesh>
       ))}
       {/* smirk */}
-      <mesh material={mats.facial} position={[0.008, 0.048, 0.118]} rotation-z={0.18}>
-        <boxGeometry args={[0.04, 0.005, 0.006]} />
+      <mesh material={mats.lips} position={[0.006, 0.05, 0.117]} rotation-z={Math.PI / 2 + 0.18} scale={[1, 1, 0.55]}>
+        <capsuleGeometry args={[0.0065, 0.03, 4, 8]} />
+      </mesh>
+      {/* cheekbones */}
+      {[-1, 1].map((s) => (
+        <mesh key={s} material={mats.skin} position={[s * 0.058, 0.098, 0.068]} scale={[1, 0.65, 0.7]}>
+          <sphereGeometry args={[0.03, 12, 10]} />
+        </mesh>
+      ))}
+      {/* neck tattoo (his right side) */}
+      <mesh material={mats.neckInk} position={[-0.062, -0.04, 0.02]} rotation-y={-1.25}>
+        <planeGeometry args={[0.06, 0.07]} />
       </mesh>
       {/* goatee */}
       <mesh material={mats.facial} position={[0, 0.0, 0.098]} scale={[1.1, 1.2, 0.55]}>
