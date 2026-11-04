@@ -1,11 +1,16 @@
 import { useState } from 'react'
-import { useGame } from '../store'
+import { useGame, type Hero } from '../store'
 
-// Plays the Remotion-rendered prologue (public/cutscenes/prologue.mp4) if it
-// exists, otherwise just shows the title card.
+const HEROES: { id: Hero; name: string; tag: string; kit: string }[] = [
+  { id: 'gimlet', name: 'Gimlet', tag: 'Bottle-slinging brawler', kit: 'Punch, throw refilling bottles, build up a Frenzy by hiding, standing still or drinking.' },
+  { id: 'kiai', name: 'Kiai', tag: 'Keytar hero', kit: 'Harmony wins Hollow ones over, and they hug others to your side. Shred blasts the rest.' },
+]
+
+// Plays the Remotion-rendered prologue (cutscenes/prologue.mp4) if it exists,
+// then lets you pick a hero.
 export function TitleScreen() {
   const started = useGame((s) => s.started)
-  const start = useGame((s) => s.start)
+  const chooseHero = useGame((s) => s.chooseHero)
   const [hasVideo, setHasVideo] = useState(true)
   const [videoDone, setVideoDone] = useState(false)
   if (started) return null
@@ -23,15 +28,25 @@ export function TitleScreen() {
           onError={() => setHasVideo(false)}
         />
       )}
-      <div className={`title-card ${showVideo ? 'over-video' : ''}`}>
-        {!showVideo && (
-          <>
-            <h1>The Last Lantern</h1>
-            <p>A story of Emberfall</p>
-          </>
-        )}
-        <button onClick={start}>{showVideo ? 'Skip' : 'Begin'}</button>
-      </div>
+      {showVideo ? (
+        <div className="title-card over-video">
+          <button onClick={() => setVideoDone(true)}>Skip</button>
+        </div>
+      ) : (
+        <div className="title-card">
+          <h1>The Last Lantern</h1>
+          <p>Choose your hero</p>
+          <div className="hero-pick">
+            {HEROES.map((h) => (
+              <button key={h.id} className={`hero-card ${h.id}`} onClick={() => chooseHero(h.id)}>
+                <strong>{h.name}</strong>
+                <em>{h.tag}</em>
+                <span>{h.kit}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

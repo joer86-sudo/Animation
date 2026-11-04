@@ -1,16 +1,23 @@
 import { useEffect, useState } from 'react'
-import { MAX_BOTTLES, isDrinking, isFrenzy, playerState, useGame } from '../store'
+import { HARMONY_COOLDOWN, MAX_BOTTLES, SHRED_COOLDOWN, hostiles, isDrinking, isFrenzy, playerState, useGame } from '../store'
 
-function objective(questAccepted: boolean, beaconLit: boolean, enemiesLeft: number) {
+function objective(questAccepted: boolean, beaconLit: boolean, enemiesLeft: number, kiai: boolean) {
   if (beaconLit) return 'The valley is safe. Return to Mira.'
   if (!questAccepted) return 'Find out why the village is so quiet.'
-  if (enemiesLeft > 0) return `Drive off the Hollow ones on the road north (${enemiesLeft} left).`
+  if (enemiesLeft > 0)
+    return kiai
+      ? `Win over or drive off the Hollow ones on the road north (${enemiesLeft} left).`
+      : `Drive off the Hollow ones on the road north (${enemiesLeft} left).`
   return 'Climb the ridge and light the beacon.'
 }
 
 export function HUD() {
   const g = useGame()
   const { health, maxHealth, embers, questAccepted, beaconLit, enemies, prompt, dialogue, hurtAt, started, restart } = g
+  const kiai = g.hero === 'kiai'
+  const now = performance.now()
+  const harmonyReady = Math.min(1, (now - g.harmonyAt) / HARMONY_COOLDOWN)
+  const shredReady = Math.min(1, (now - g.shredAt) / SHRED_COOLDOWN)
   const frenzy = isFrenzy(g)
   const drinking = isDrinking(g)
   const status = frenzy
@@ -43,6 +50,22 @@ export function HUD() {
             <span key={i} className={i < health ? 'heart' : 'heart empty'} />
           ))}
         </div>
+        {kiai ? (
+          <div className="kit modes">
+            <div className={`mode harmony ${g.mode === 'harmony' ? 'on' : ''}`}>
+              <i style={{ width: `${harmonyReady * 100}%` }} />
+              <span>
+                <kbd>Q</kbd> Harmony
+              </span>
+            </div>
+            <div className={`mode shred ${g.mode === 'shred' ? 'on' : ''}`}>
+              <i style={{ width: `${shredReady * 100}%` }} />
+              <span>
+                <kbd>F</kbd> Shred
+              </span>
+            </div>
+          </div>
+        ) : (
         <div className="kit">
           <div className="bottles" aria-label={`${g.bottles} bottles`}>
             {Array.from({ length: MAX_BOTTLES }, (_, i) => (
@@ -58,8 +81,12 @@ export function HUD() {
             <span>{status}</span>
           </div>
         </div>
-        <div className="embers">Hollow ones banished: {embers}</div>
-        <div className="objective">{objective(questAccepted, beaconLit, enemies.length)}</div>
+        )}
+        <div className="embers">
+          Hollow ones banished: {embers}
+          {g.befriended > 0 && <> · befriended: {g.befriended} ♥</>}
+        </div>
+        <div className="objective">{objective(questAccepted, beaconLit, hostiles(g).length, kiai)}</div>
       </div>
       {prompt && !dialogue && health > 0 && (
         <div className="prompt">
@@ -67,7 +94,15 @@ export function HUD() {
         </div>
       )}
       <div className="help">
-        <kbd>WASD</kbd> move · <kbd>Space</kbd> jump · <kbd>F</kbd>/click punch · <kbd>Q</kbd>/right-click throw · <kbd>C</kbd> drink · <kbd>E</kbd> interact
+        <kbd>WASD</kbd> move · <kbd>Space</kbd> jump · {kiai ? (
+          <>
+            <kbd>F</kbd>/click shred · <kbd>Q</kbd>/right-click harmony · <kbd>E</kbd> interact
+          </>
+        ) : (
+          <>
+            <kbd>F</kbd>/click punch · <kbd>Q</kbd>/right-click throw · <kbd>C</kbd> drink · <kbd>E</kbd> interact
+          </>
+        )}
       </div>
       {health <= 0 && (
         <div className="overlay">

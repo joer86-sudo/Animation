@@ -51,10 +51,26 @@ His kit (tuning constants at the top of `store.ts`):
 
 ## Character handover kits
 
-`handover/gimlet/` and `handover/saz/` each hold everything needed to take that character to another
+`handover/gimlet/`, `handover/saz/` and `handover/kiai/` each hold everything needed to take that character to another
 project or another Claude: a `*_HANDOVER.md` (character bible, rig notes, full source), a `.glb` model with
 named joints, and the concept art. Re-export a model any time with the **Export .glb** button in the
-character viewer (`?view=gimlet` or `?view=saz`).
+character viewer (`?view=gimlet`, `?view=saz` or `?view=kiai`).
+
+## Kiai (playable)
+
+Pick her on the title screen. Built in `game/src/characters/kiai/`: the model with IK-driven arms
+(`Kiai.tsx`), her keytar with individually pressable keys (`Keytar.tsx`), painted textures and tattoos
+(`textures.ts`), and her two original songs plus a Web Audio synth (`music.ts`).
+- **Harmony** (Q / right-click): charms Hollow ones within 7 m; twice-charmed ones switch sides and go cuddle
+  other Hollow ones until those switch too.
+- **Shred** (F / click): a 7 m distorted shockwave cone that destroys them.
+When you play Gimlet, she's in the village instead.
+
+## The valley
+
+`game/src/world/Nature.tsx` grows the scenery with instancing: about 240 trees (oak, blossom, pine, birch),
+flower meadows, 3,200 grass tufts, bushes, a lily pond and butterflies. The sun follows the hero so shadows
+stay sharp.
 
 ## Saz
 

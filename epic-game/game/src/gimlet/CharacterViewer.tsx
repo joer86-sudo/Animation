@@ -7,15 +7,31 @@ import { InstancedMesh, Matrix4, Mesh, type BufferGeometry, type Object3D } from
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { DRINK_MS, Gimlet, type GimletPose } from './Gimlet'
 import { Saz, type SazPose } from '../characters/Saz'
+import { Kiai, type KiaiPose } from '../characters/kiai/Kiai'
+import { startLoop, stopLoop } from '../characters/kiai/music'
 
-type Who = 'Gimlet' | 'Saz'
+type Who = 'Gimlet' | 'Saz' | 'Kiai'
 
 // Turntable for designing the cast: open the game with ?view=gimlet or ?view=saz
 export function CharacterViewer() {
-  const initial: Who = new URLSearchParams(location.search).get('view') === 'saz' ? 'Saz' : 'Gimlet'
+  const v = new URLSearchParams(location.search).get('view')
+  const initial: Who = v === 'saz' ? 'Saz' : v === 'kiai' ? 'Kiai' : 'Gimlet'
   const [who, setWho] = useState<Who>(initial)
   const gimlet = useRef<GimletPose>({ moving: false, frenzy: false, bottles: 2, attackAt: 0, throwAt: 0, drinkStart: 0, drinkUntil: 0 })
   const saz = useRef<SazPose>({ dancing: false, waveAt: 0, talking: false })
+  const kiai = useRef<KiaiPose>({ moving: false, mode: 'idle', modeStart: performance.now(), castAt: 0, shredAt: 0 })
+  const k = kiai.current
+  const setSong = (mode: 'harmony' | 'shred') => {
+    if (k.mode === mode) {
+      k.mode = 'idle'
+      stopLoop()
+    } else {
+      k.mode = mode
+      k.modeStart = performance.now()
+      startLoop(mode, k.modeStart)
+    }
+    rerender()
+  }
   const [, force] = useState(0)
   const rerender = () => force((n) => n + 1)
   const g = gimlet.current
@@ -30,7 +46,13 @@ export function CharacterViewer() {
           ['Throw', () => (g.throwAt = performance.now())],
           ['Drink', () => ((g.drinkStart = performance.now()), (g.drinkUntil = g.drinkStart + DRINK_MS))],
         ]
-      : [
+      : who === 'Kiai'
+        ? [
+            ['Harmony ♪', () => setSong('harmony'), k.mode === 'harmony'],
+            ['Shred ⚡', () => setSong('shred'), k.mode === 'shred'],
+            ['Run', () => ((k.moving = !k.moving), rerender()), k.moving],
+          ]
+        : [
           ['Dance', () => ((s.dancing = !s.dancing), rerender()), s.dancing],
           ['Talk', () => ((s.talking = !s.talking), rerender()), s.talking],
           ['Wave', () => (s.waveAt = performance.now())],
@@ -43,7 +65,7 @@ export function CharacterViewer() {
         <hemisphereLight args={['#ffffff', '#6a6570', 1.1]} />
         <directionalLight position={[3, 5, 4]} intensity={2.2} castShadow shadow-mapSize={[2048, 2048]} />
         <directionalLight position={[-4, 2, -3]} intensity={0.8} color="#cfd8ff" />
-        {who === 'Gimlet' ? <Gimlet getPose={() => gimlet.current} /> : <Saz getPose={() => saz.current} />}
+        {who === 'Gimlet' ? <Gimlet getPose={() => gimlet.current} /> : who === 'Saz' ? <Saz getPose={() => saz.current} /> : <Kiai getPose={() => kiai.current} />}
         <ExportHook />
         <ContactShadows position={[0, 0.001, 0]} opacity={0.5} scale={4} blur={2} far={2} />
         <OrbitControls target={[0, 0.95, 0]} enablePan={false} minDistance={0.8} maxDistance={7} />
@@ -53,8 +75,8 @@ export function CharacterViewer() {
       </Canvas>
       <div className="viewer-bar">
         <div className="who" role="tablist">
-          {(['Gimlet', 'Saz'] as Who[]).map((n) => (
-            <button key={n} role="tab" aria-selected={who === n} className={who === n ? 'active' : ''} onClick={() => setWho(n)}>
+          {(['Gimlet', 'Saz', 'Kiai'] as Who[]).map((n) => (
+            <button key={n} role="tab" aria-selected={who === n} className={who === n ? 'active' : ''} onClick={() => (stopLoop(), (k.mode = 'idle'), setWho(n))}>
               {n}
             </button>
           ))}

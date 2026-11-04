@@ -8,6 +8,7 @@ import { touchInput, type Controls } from '../controls'
 import { HeroModel, useHeroAvailable } from './HeroModel'
 import { HIDE_SPOTS } from './Level'
 import { Gimlet, type GimletPose } from '../gimlet/Gimlet'
+import { Kiai, type KiaiPose } from '../characters/kiai/Kiai'
 
 const SPEED = 5.5
 const FRENZY_SPEED_MUL = 1.6
@@ -31,6 +32,8 @@ export function Player() {
   const [, getKeys] = useKeyboardControls<Controls>()
   const { world, rapier } = useRapier()
   const questAccepted = useGame((s) => s.questAccepted)
+  const hero = useGame((s) => s.hero)
+  const kiaiPose = useRef<KiaiPose>({ moving: false, mode: 'idle', modeStart: performance.now(), castAt: 0, shredAt: 0 })
 
   const pose = useRef<GimletPose>({ moving: false, frenzy: false, bottles: 2, attackAt: 0, throwAt: 0, drinkStart: 0, drinkUntil: 0 })
 
@@ -93,6 +96,14 @@ export function Player() {
     p.throwAt = g.throwAt
     p.drinkStart = g.drinkStart
     p.drinkUntil = g.drinkUntil
+    const k = kiaiPose.current
+    k.moving = moving.current
+    if (g.mode !== k.mode) {
+      k.mode = g.mode
+      k.modeStart = g.mode === 'idle' ? performance.now() : g.modeStart
+    }
+    k.castAt = g.harmonyAt
+    k.shredAt = g.shredAt
 
     // follow camera (a little shake during frenzy)
     camTarget.set(t.x, t.y, t.z).add(CAMERA_OFFSET)
@@ -112,7 +123,7 @@ export function Player() {
           </Suspense>
         ) : (
           <group position-y={-0.85} scale={MODEL_SCALE}>
-            <Gimlet getPose={() => pose.current} />
+            {hero === 'kiai' ? <Kiai getPose={() => kiaiPose.current} /> : <Gimlet getPose={() => pose.current} />}
           </group>
         )}
         {questAccepted && (

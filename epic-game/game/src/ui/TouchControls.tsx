@@ -8,6 +8,7 @@ export function TouchControls() {
   const started = useGame((s) => s.started)
   const dialogue = useGame((s) => s.dialogue)
   const prompt = useGame((s) => s.prompt)
+  const hero = useGame((s) => s.hero)
   const base = useRef<HTMLDivElement>(null)
   const [knob, setKnob] = useState({ x: 0, y: 0 })
   const pointerId = useRef<number | null>(null)
@@ -70,8 +71,17 @@ export function TouchControls() {
             {prompt.label}
           </button>
         )}
-        <button className="act" onPointerDown={tap(() => g().drink())}>Drink</button>
-        <button className="act" onPointerDown={tap(() => g().throwBottle())}>Throw</button>
+        {hero === 'kiai' ? (
+          <>
+            <span />
+            <button className="act harmony" onPointerDown={tap(() => g().harmony())}>Harmony</button>
+          </>
+        ) : (
+          <>
+            <button className="act" onPointerDown={tap(() => g().drink())}>Drink</button>
+            <button className="act" onPointerDown={tap(() => g().throwBottle())}>Throw</button>
+          </>
+        )}
         <button
           className="act"
           onPointerDown={tap(() => (touchInput.jump = true))}
@@ -80,7 +90,9 @@ export function TouchControls() {
         >
           Jump
         </button>
-        <button className="act big" onPointerDown={tap(() => g().attack())}>Punch</button>
+        <button className="act big" onPointerDown={tap(() => (hero === 'kiai' ? g().shred() : g().attack()))}>
+          {hero === 'kiai' ? 'Shred' : 'Punch'}
+        </button>
       </div>
     </div>
   )

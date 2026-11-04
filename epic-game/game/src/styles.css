@@ -107,3 +107,26 @@ button:hover { background: rgba(255, 140, 40, 0.25); }
 @media (pointer: coarse) { .help { display: none; } .prompt { display: none; } }
 .viewer-bar .who { display: flex; gap: 4px; padding-right: 8px; margin-right: 2px; border-right: 1px solid var(--border); }
 .viewer-bar .who button { font-size: 0.95rem; }
+
+/* hero select */
+.hero-pick { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; width: min(620px, calc(100vw - 32px)); margin: 0 auto; }
+.hero-card { display: grid; gap: 6px; text-align: left; padding: 16px 18px; border-radius: 12px; letter-spacing: 0; }
+.hero-card strong { font: 700 1.5rem Cinzel, serif; }
+.hero-card em { font: italic 500 0.95rem Inter, sans-serif; color: var(--ember); }
+.hero-card span { font: 400 0.88rem/1.45 Inter, sans-serif; color: var(--muted); }
+.hero-card.gimlet { border-color: rgba(164, 255, 76, 0.5); }
+.hero-card.kiai { border-color: rgba(185, 120, 255, 0.6); background: rgba(139, 69, 216, 0.14); }
+.hero-card.kiai em { color: #d2a8ff; }
+
+/* Kiai's modes */
+.modes { grid-template-columns: repeat(2, 128px); gap: 8px; }
+.mode { position: relative; height: 26px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); background: rgba(0, 0, 0, 0.45); display: grid; align-items: center; padding: 0 8px; font-size: 0.8rem; }
+.mode i { position: absolute; inset: 0 auto 0 0; }
+.mode span { position: relative; }
+.mode.harmony i { background: linear-gradient(90deg, rgba(255, 140, 200, 0.25), rgba(255, 190, 230, 0.45)); }
+.mode.shred i { background: linear-gradient(90deg, rgba(140, 70, 255, 0.3), rgba(190, 130, 255, 0.5)); }
+.mode.on { box-shadow: 0 0 12px rgba(255, 170, 230, 0.6); }
+.mode.shred.on { box-shadow: 0 0 12px rgba(180, 107, 255, 0.8); }
+.act.harmony { background: rgba(255, 140, 200, 0.25); }
+.title-screen, .overlay { z-index: 50; }
+.dialogue, .touch { z-index: 30; }
